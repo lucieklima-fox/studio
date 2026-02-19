@@ -2,8 +2,10 @@
 
 /**
  * @fileOverview Core music logic for note validation, MIDI mapping, and staff positions.
+ * Rewritten for absolute precision using interval-based math.
  */
 
+// ---------- TYPES ----------
 export type Accidental = "natural" | "sharp";
 export type Clef = "treble" | "bass";
 export type NoteLetter = "C" | "D" | "E" | "F" | "G" | "A" | "B";
@@ -25,8 +27,12 @@ const baseOffsetMap: Record<NoteLetter, number> = {
   C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11
 };
 
-const trebleBaseIndex = 4 * 7 + 2; // E4 = 0 (bottom line)
-const bassBaseIndex = 2 * 7 + 4;   // G2 = 0 (bottom line)
+// Reference points for staff positioning (Diatonic indices)
+// Middle C (C4) is 4 * 7 + 0 = 28
+// Treble Bottom Line (E4) is 4 * 7 + 2 = 30
+// Bass Bottom Line (G2) is 2 * 7 + 4 = 18
+const trebleBaseIndex = 30; 
+const bassBaseIndex = 18;
 
 // ---------- MIDI ↔ NOTE CONVERSION ----------
 
@@ -86,13 +92,14 @@ export function noteToTone(note: MusicalNote): string {
 export function toneToMidi(tone: string): number {
   const letter = tone.charAt(0) as NoteLetter;
   const isSharp = tone.includes('#');
-  const octave = parseInt(tone.slice(-1));
+  const octaveStr = tone.match(/\d+$/)?.[0] || "4";
+  const octave = parseInt(octaveStr);
   
   return noteToMidi({
     letter,
     octave,
     accidental: isSharp ? 'sharp' : 'natural',
-    clef: 'treble' // clef doesn't affect MIDI
+    clef: 'treble' 
   });
 }
 
@@ -113,18 +120,18 @@ export function midiToStaffIndex(midi: number, clef: Clef): number {
 
 /**
  * Generates relative staff indices for ledger lines.
+ * Standard staff lines are 0, 2, 4, 6, 8.
  */
 export function getLedgerLines(staffIndex: number): number[] {
   const lines: number[] = [];
-  // Standard lines are index 0, 2, 4, 6, 8
   if (staffIndex < 0) {
-    // Indices -2, -4 etc. are ledger lines below
+    // Ledger lines below: -2, -4, -6...
     for (let i = -2; i >= staffIndex; i -= 2) {
       lines.push(i);
     }
   } else if (staffIndex > 8) {
-    // Indices 10, 12 etc. are ledger lines above
-    for (let i = 10; i <= staffIndex; i -= 2) {
+    // Ledger lines above: 10, 12, 14...
+    for (let i = 10; i <= staffIndex; i += 2) {
       lines.push(i);
     }
   }
@@ -134,26 +141,27 @@ export function getLedgerLines(staffIndex: number): number[] {
 // ---------- VALIDATION ----------
 
 /**
- * Strict equality validation for two notes.
+ * Strict equality validation using MIDI numbers.
  */
 export function isCorrectAnswer(generated: MusicalNote, userAnswer: Partial<MusicalNote>): boolean {
   if (!userAnswer.letter || userAnswer.octave === undefined || !userAnswer.accidental) return false;
   
   const generatedMidi = noteToMidi(generated);
   const userMidi = noteToMidi({
-    ...generated,
-    letter: userAnswer.letter,
+    letter: userAnswer.letter as NoteLetter,
     octave: userAnswer.octave,
-    accidental: userAnswer.accidental as Accidental
+    accidental: userAnswer.accidental as Accidental,
+    clef: generated.clef
   });
 
   return generatedMidi === userMidi;
 }
 
 /**
- * Generates a random note from the validated pool.
+ * Generates a random note from a specific pool of MIDI numbers.
  */
-export function generateRandomNoteFromPool(clef: Clef, allowedMidis: number[]): MusicalNote {
+export function generateRandomNote(clef: Clef, allowedMidis: number[]): MusicalNote {
+  if (allowedMidis.length === 0) throw new Error("No MIDI pool provided for random note generation");
   const randomIndex = Math.floor(Math.random() * allowedMidis.length);
   const midi = allowedMidis[randomIndex];
   return midiToNote(midi, clef);

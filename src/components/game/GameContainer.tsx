@@ -10,12 +10,13 @@ import { FeedbackOverlay } from './FeedbackOverlay';
 import { usePiano } from '@/hooks/use-piano';
 import { 
   MusicalNote, 
-  generateRandomNoteFromPool, 
+  generateRandomNote, 
   isCorrectAnswer, 
   noteToTone, 
   toneToMidi,
   NoteLetter, 
-  Accidental
+  Accidental,
+  midiToNote
 } from '@/lib/music-logic';
 import { musicSystemConfig } from '@/lib/music-system';
 import { Music, Keyboard, GraduationCap, RotateCcw, Award, Sparkles } from 'lucide-react';
@@ -42,12 +43,13 @@ export default function GameContainer() {
   const generateNextRound = useCallback(() => {
     // Only pick notes appropriate for the selected clef from the pool
     const pool = musicSystemConfig.allowedStaffMidis.filter(midi => {
-      // Simple range filter for beginners per clef
-      if (clef === 'treble') return midi >= 57 && midi <= 81; // A3 to A5
-      return midi >= 38 && midi <= 62; // D2 to D4
+      // Filter the global pool for notes that actually fit on the current staff
+      // Middle C (60) is allowed in both
+      if (clef === 'treble') return midi >= 57; // A3 and above
+      return midi <= 64; // E4 and below
     });
 
-    const newNote = generateRandomNoteFromPool(clef, pool);
+    const newNote = generateRandomNote(clef, pool);
     setCurrentNote(newNote);
     setStatus(null);
   }, [clef]);

@@ -57,13 +57,13 @@ export function validateMusicSystem(config: MusicSystemConfig): void {
 }
 
 /**
- * Derives staff-safe notes (within a reasonable display range) from the keyboard range.
+ * Derives staff-safe notes from the keyboard range.
  */
 function deriveStaffNotes(keyboardMidis: number[]): number[] {
   return keyboardMidis.filter(midi => {
-    // Limit staff display to a standard readable range with reasonable ledger lines
     const trebleIndex = midiToStaffIndex(midi, "treble");
     const bassIndex = midiToStaffIndex(midi, "bass");
+    // Limit staff display to a standard readable range with reasonable ledger lines
     return (trebleIndex >= -6 && trebleIndex <= 14) || 
            (bassIndex >= -6 && bassIndex <= 14);
   });
