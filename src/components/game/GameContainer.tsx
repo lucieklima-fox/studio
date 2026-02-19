@@ -21,7 +21,7 @@ import {
   noteToMidi
 } from '@/lib/music-logic';
 import { musicSystemConfig } from '@/lib/music-system';
-import { Music, Keyboard, GraduationCap, RotateCcw, Award, Sparkles, Trophy, PlayCircle } from 'lucide-react';
+import { Music, Keyboard, GraduationCap, RotateCcw, Award, Sparkles, Trophy, PlayCircle, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useFirestore } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
@@ -59,20 +59,20 @@ export default function GameContainer() {
   const [testCorrectCount, setTestCorrectCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
-  // Generate 50 unique/varied notes for the challenge
+  // Generate a random but fair sequence for the 50-note mastery challenge
   const challengeNotes = useMemo(() => {
     const sequence: MusicalNote[] = [];
     const pool = musicSystemConfig.allowedStaffMidis;
     
-    // Seeded sequence for consistency in a "test"
+    // We want a mix of notes across the entire C2-C7 range
     for (let i = 0; i < 50; i++) {
-      const midi = pool[(i * 13) % pool.length]; // Deterministic but varied shuffle
-      // Assign clef based on octave (C2-C4 usually bass, C4-C7 usually treble)
+      const midi = pool[Math.floor(Math.random() * pool.length)];
+      // Automatically split clef at Middle C (60)
       const targetClef = midi < 60 ? 'bass' : 'treble';
       sequence.push(midiToNote(midi, targetClef));
     }
     return sequence;
-  }, []);
+  }, [isTestActive]); // Re-generate sequence only when starting a new test
 
   const generateNextRound = useCallback(() => {
     if (mode === 'challenge' && isTestActive) {
@@ -241,13 +241,13 @@ export default function GameContainer() {
       }} className="w-full">
         <TabsList className="grid grid-cols-3 h-auto p-2 bg-white rounded-3xl border-2 border-primary/10 gap-2 mb-8 max-w-2xl mx-auto">
           <TabsTrigger value="identify" className="py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 text-lg font-bold">
-            <GraduationCap size={20} /> Name Note
+            <GraduationCap size={20} /> Identify Note
           </TabsTrigger>
           <TabsTrigger value="find" className="py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 text-lg font-bold">
-            <Keyboard size={20} /> Find Key
+            <Keyboard size={20} /> Find on Piano
           </TabsTrigger>
           <TabsTrigger value="challenge" className="py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 text-lg font-bold">
-            <Trophy size={20} /> 50 Notes
+            <Trophy size={20} /> 50 Note Test
           </TabsTrigger>
         </TabsList>
 
@@ -271,14 +271,28 @@ export default function GameContainer() {
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                       <h2 className="text-2xl font-bold flex items-center gap-2">
                           {mode === 'challenge' ? <Trophy className="text-primary" /> : <GraduationCap className="text-primary" />}
-                          {mode === 'challenge' ? `Note ${testIndex + 1} of 50` : `What note is this?`}
+                          {mode === 'challenge' ? `Question ${testIndex + 1} of 50` : `Name the note on the staff:`}
                       </h2>
-                      {!isTestActive && (
-                        <div className="flex bg-muted p-1 rounded-xl">
-                            <Button variant={clef === 'treble' ? 'default' : 'ghost'} onClick={() => setClef('treble')} className="rounded-lg font-bold">Treble</Button>
-                            <Button variant={clef === 'bass' ? 'default' : 'ghost'} onClick={() => setClef('bass')} className="rounded-lg font-bold">Bass</Button>
-                        </div>
-                      )}
+                      
+                      <div className="flex gap-2">
+                        {currentNote && !isTestActive && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="rounded-xl font-bold gap-2"
+                            onClick={() => playNote(noteToTone(currentNote))}
+                          >
+                            <Volume2 size={16} /> Listen
+                          </Button>
+                        )}
+                        {!isTestActive && (
+                          <div className="flex bg-muted p-1 rounded-xl">
+                              <Button variant={clef === 'treble' ? 'default' : 'ghost'} onClick={() => setClef('treble')} className="rounded-lg font-bold h-8 px-3 text-xs">Treble</Button>
+                              <Button variant={clef === 'bass' ? 'default' : 'ghost'} onClick={() => setClef('bass')} className="rounded-lg font-bold h-8 px-3 text-xs">Bass</Button>
+                          </div>
+                        )}
+                      </div>
+
                       {isTestActive && (
                         <div className="w-full sm:w-48 space-y-2">
                            <div className="flex justify-between text-xs font-bold uppercase text-muted-foreground">
@@ -332,7 +346,7 @@ export default function GameContainer() {
           <TabsContent value="find" className="mt-0 space-y-6">
             <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 text-center space-y-8">
                <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Keyboard className="text-primary" /> Find on Keyboard:
+                    <Keyboard className="text-primary" /> Find this key on the piano:
                 </h2>
                 <div className="py-12 bg-primary/5 rounded-[2rem] border-4 border-dashed border-primary/20">
                     <span className="text-8xl font-black text-primary animate-pulse">
@@ -342,7 +356,7 @@ export default function GameContainer() {
                 </div>
                 <div className="flex justify-center gap-4">
                   <Button size="lg" onClick={() => currentNote && playNote(noteToTone(currentNote))} className="rounded-2xl gap-2 h-16 px-8 text-xl font-bold shadow-lg">
-                    <Music /> Listen
+                    <Volume2 /> Listen
                   </Button>
                 </div>
             </Card>
@@ -357,11 +371,11 @@ export default function GameContainer() {
                 <div className="space-y-4">
                   <h2 className="text-4xl font-black">50 Note Mastery</h2>
                   <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-                    A comprehensive test across both clefs (C2–C7). Can you identify all 50 notes perfectly?
+                    A comprehensive assessment across the full range (**C2 to C7**). Can you identify every note perfectly?
                   </p>
                 </div>
                 <Button onClick={startChallenge} size="lg" className="rounded-2xl h-20 px-12 text-2xl font-bold shadow-xl gap-3">
-                  <PlayCircle size={32} /> Begin Test
+                  <PlayCircle size={32} /> Start Assessment
                 </Button>
               </Card>
             )}
@@ -382,18 +396,20 @@ export default function GameContainer() {
         <AlertDialogContent className="rounded-[2.5rem] p-8">
           <AlertDialogHeader className="items-center text-center space-y-4">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-               <Trophy size={40} />
+               <Award size={40} />
             </div>
-            <AlertDialogTitle className="text-3xl font-black">Test Complete!</AlertDialogTitle>
+            <AlertDialogTitle className="text-3xl font-black">Assessment Complete!</AlertDialogTitle>
             <AlertDialogDescription className="text-xl">
-              You scored <span className="font-bold text-foreground">{testCorrectCount}</span> out of <span className="font-bold text-foreground">50</span>.
+              You correctly identified <span className="font-bold text-foreground">{testCorrectCount}</span> out of <span className="font-bold text-foreground">50</span> notes.
               <br />
-              Accuracy: <span className="font-bold text-primary">{Math.round((testCorrectCount / 50) * 100)}%</span>
+              <span className="text-primary font-black text-3xl mt-2 block">
+                {Math.round((testCorrectCount / 50) * 100)}% Accuracy
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center mt-6">
             <AlertDialogAction onClick={() => {setShowResults(false); setMode('identify');}} className="rounded-xl h-14 px-8 text-lg font-bold">
-              Return to Practice
+              Back to Practice
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
