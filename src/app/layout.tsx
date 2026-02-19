@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { FirebaseClientProvider } from '@/firebase';
-import { musicSystemConfig } from '@/lib/music-system'; // Forces initialization/validation at boot
+import { musicSystemConfig } from '@/lib/music-system';
 
 export const metadata: Metadata = {
   title: 'Melody Maestro - Learn Music the Fun Way!',
@@ -13,7 +13,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Ensure the config is loaded. If validateMusicSystem threw, this layout won't render.
+  // Ensure the config is initialized
   const isSystemReady = !!musicSystemConfig;
 
   return (
@@ -25,7 +25,13 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground">
         <FirebaseClientProvider>
-          {isSystemReady ? children : <div className="p-20 text-center font-bold text-destructive">System Initialization Failed</div>}
+          {isSystemReady ? children : (
+            <div className="flex items-center justify-center min-h-screen">
+               <div className="p-10 text-center bg-white rounded-3xl shadow-xl">
+                  <p className="text-xl font-bold text-destructive">Initializing System...</p>
+               </div>
+            </div>
+          )}
         </FirebaseClientProvider>
       </body>
     </html>

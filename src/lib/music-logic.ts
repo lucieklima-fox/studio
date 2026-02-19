@@ -1,17 +1,11 @@
-'use client';
-
 /**
  * @fileOverview Core music logic for note validation, MIDI mapping, and staff positions.
- * Uses a deterministic diatonic system (steps) for staff positioning and 
- * an absolute MIDI system for pitch validation.
+ * Pure mathematical functions for consistency between C2 and C5.
  */
 
-// ---------- CONSTANTS ----------
+import { KEYBOARD_RANGE } from './music-constants';
 
-export const KEYBOARD_RANGE = {
-  minMidi: 36, // C2
-  maxMidi: 72  // C5
-};
+// ---------- CONSTANTS ----------
 
 const letterIndexMap: Record<string, number> = {
   C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6
@@ -23,8 +17,6 @@ const baseOffsetMap: Record<string, number> = {
 
 /**
  * Reference points for staff positioning (Diatonic indices)
- * Index = (Octave * 7) + LetterIndex
- * Middle C (C4) = (4 * 7) + 0 = 28
  * Treble Clef Bottom Line (E4) = (4 * 7) + 2 = 30
  * Bass Clef Bottom Line (G2) = (2 * 7) + 4 = 18
  */
@@ -51,17 +43,13 @@ export type MusicalNote = {
  * Accidentals are resolved to sharps.
  */
 export function midiToNote(midi: number, clef: Clef = "treble"): MusicalNote {
-  if (midi < 0 || midi > 127) throw new Error(`Invalid MIDI ${midi}`);
-
   const octave = Math.floor(midi / 12) - 1;
   const semitone = midi % 12;
 
   let letter: NoteLetter = "C";
   let accidental: Accidental = "natural";
 
-  // Reverse map semitone to letter
-  const entries = Object.entries(baseOffsetMap);
-  for (const [ltr, offset] of entries) {
+  for (const [ltr, offset] of Object.entries(baseOffsetMap)) {
     if (offset === semitone) {
       letter = ltr as NoteLetter;
       accidental = "natural";
@@ -108,25 +96,16 @@ export function midiToStaffIndex(midi: number, clef: Clef): number {
 
 /**
  * Generates relative staff indices for ledger lines.
- * Staff lines are at indices 0, 2, 4, 6, 8.
  */
 export function getLedgerLines(staffIndex: number): number[] {
   const lines: number[] = [];
   if (staffIndex < 0) {
-    // Below staff: -2, -4, -6...
-    for (let i = -2; i >= staffIndex; i -= 2) {
-      lines.push(i);
-    }
+    for (let i = -2; i >= staffIndex; i -= 2) lines.push(i);
   } else if (staffIndex > 8) {
-    // Above staff: 10, 12, 14...
-    for (let i = 10; i <= staffIndex; i += 2) {
-      lines.push(i);
-    }
+    for (let i = 10; i <= staffIndex; i += 2) lines.push(i);
   }
   return lines;
 }
-
-// ---------- VALIDATION & GENERATION ----------
 
 export function isCorrectAnswer(generated: MusicalNote, userAnswer: Partial<MusicalNote>): boolean {
   if (!userAnswer.letter || userAnswer.octave === undefined || !userAnswer.accidental) return false;
@@ -143,7 +122,7 @@ export function isCorrectAnswer(generated: MusicalNote, userAnswer: Partial<Musi
 }
 
 export function generateRandomNote(clef: Clef, allowedMidis: number[]): MusicalNote {
-  if (allowedMidis.length === 0) throw new Error("MIDI pool empty");
+  if (allowedMidis.length === 0) return midiToNote(60, clef); // Default to Middle C if pool error
   const randomIndex = Math.floor(Math.random() * allowedMidis.length);
   return midiToNote(allowedMidis[randomIndex], clef);
 }

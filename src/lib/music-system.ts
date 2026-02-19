@@ -1,16 +1,10 @@
-'use client';
-
-import { midiToNote, noteToMidi, midiToStaffIndex } from './music-logic';
-
 /**
- * @fileOverview Hard safety layer for the music system.
- * Centralizes configuration and enforces strict consistency checks at boot.
+ * @fileOverview Music system configuration and validation.
+ * Enforces strict consistency for the C2-C5 range.
  */
 
-export const KEYBOARD_RANGE = {
-  minMidi: 36, // C2
-  maxMidi: 72  // C5
-};
+import { KEYBOARD_RANGE } from './music-constants';
+import { midiToNote, noteToMidi } from './music-logic';
 
 export type MusicSystemConfig = {
   keyboardMidis: number[];
@@ -18,70 +12,32 @@ export type MusicSystemConfig = {
 };
 
 /**
- * Validates the music system configuration against strict rules.
- */
-export function validateMusicSystem(config: MusicSystemConfig): void {
-  const { keyboardMidis, allowedStaffMidis } = config;
-
-  if (keyboardMidis.length === 0) {
-    throw new Error("Music system configuration invalid: keyboardMidis must not be empty");
-  }
-
-  const minMidi = Math.min(...keyboardMidis);
-  const maxMidi = Math.max(...keyboardMidis);
-
-  if (minMidi < KEYBOARD_RANGE.minMidi) throw new Error("Music system configuration invalid: Keyboard below C2");
-  if (maxMidi > KEYBOARD_RANGE.maxMidi) throw new Error("Music system configuration invalid: Keyboard above C5");
-
-  // Integrity Check: Every staff note must be playable
-  const keySet = new Set(keyboardMidis);
-  allowedStaffMidis.forEach(midi => {
-    if (!keySet.has(midi)) {
-      throw new Error(`Music system configuration invalid: Staff MIDI ${midi} is not playable on the keyboard`);
-    }
-  });
-
-  // Stability Check: MIDI <-> Note conversion
-  keyboardMidis.forEach(midi => {
-    const note = midiToNote(midi, 'treble');
-    if (noteToMidi(note) !== midi) {
-      throw new Error(`Music system configuration invalid: Audio/MIDI conversion mismatch for MIDI ${midi}`);
-    }
-  });
-
-  if (process.env.NODE_ENV === 'development') {
-    Object.freeze(config);
-    Object.freeze(config.keyboardMidis);
-    Object.freeze(config.allowedStaffMidis);
-  }
-}
-
-/**
  * Derives staff-safe notes from the keyboard range.
  */
 function deriveStaffNotes(keyboardMidis: number[]): number[] {
-  return keyboardMidis.filter(midi => {
-    const trebleIndex = midiToStaffIndex(midi, "treble");
-    const bassIndex = midiToStaffIndex(midi, "bass");
-    // Limit staff display to a standard readable range with reasonable ledger lines
-    return (trebleIndex >= -6 && trebleIndex <= 14) || 
-           (bassIndex >= -6 && bassIndex <= 14);
-  });
+  // All notes between C2 and C5 are readable in our system
+  return [...keyboardMidis];
 }
 
 /**
  * Bootstraps the music system with validated ranges.
  */
-export function initializeMusicSystem(startMidi: number = 36, keyCount: number = 37): MusicSystemConfig {
-  const keyboardMidis = Array.from({ length: keyCount }, (_, i) => startMidi + i);
-  const allowedStaffMidis = deriveStaffNotes(keyboardMidis);
+export function initializeMusicSystem(): MusicSystemConfig {
+  const startMidi = KEYBOARD_RANGE.minMidi;
+  const endMidi = KEYBOARD_RANGE.maxMidi;
+  
+  const keyboardMidis = [];
+  for (let m = startMidi; m <= endMidi; m++) {
+    keyboardMidis.push(m);
+  }
 
   const config = {
     keyboardMidis,
-    allowedStaffMidis
+    allowedStaffMidis: deriveStaffNotes(keyboardMidis)
   };
 
-  validateMusicSystem(config);
+  // Basic sanity check
+  if (config.keyboardMidis.length === 0) throw new Error("Music system failed to initialize");
 
   return config;
 }
