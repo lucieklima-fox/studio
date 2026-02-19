@@ -66,8 +66,9 @@ export default function GameContainer() {
     
     // Seeded sequence for consistency in a "test"
     for (let i = 0; i < 50; i++) {
-      const midi = pool[(i * 7) % pool.length]; // Deterministic but varied
-      const targetClef = i < 25 ? 'treble' : 'bass';
+      const midi = pool[(i * 13) % pool.length]; // Deterministic but varied shuffle
+      // Assign clef based on octave (C2-C4 usually bass, C4-C7 usually treble)
+      const targetClef = midi < 60 ? 'bass' : 'treble';
       sequence.push(midiToNote(midi, targetClef));
     }
     return sequence;
@@ -75,7 +76,7 @@ export default function GameContainer() {
 
   const generateNextRound = useCallback(() => {
     if (mode === 'challenge' && isTestActive) {
-      if (testIndex < challengeNotes.length) {
+      if (testIndex < 50) {
         const nextNote = challengeNotes[testIndex];
         setCurrentNote(nextNote);
         setClef(nextNote.clef);
@@ -88,8 +89,8 @@ export default function GameContainer() {
     }
 
     const pool = musicSystemConfig.allowedStaffMidis.filter(midi => {
-      if (clef === 'treble') return midi >= 57; 
-      return midi <= 64; 
+      if (clef === 'treble') return midi >= 60; // Middle C and up for treble
+      return midi <= 60; // Middle C and down for bass
     });
 
     const newNote = generateRandomNote(clef, pool);
@@ -163,7 +164,7 @@ export default function GameContainer() {
       if (isTestActive) {
         setTimeout(() => {
            setTestIndex(i => i + 1);
-        }, 1200);
+        }, 800);
       }
     }
   }, [currentNote, status, playNote, logSession, isTestActive]);
@@ -192,7 +193,7 @@ export default function GameContainer() {
     if (isTestActive) {
       setTimeout(() => {
          setTestIndex(i => i + 1);
-      }, 1200);
+      }, 800);
     }
   };
 
@@ -235,7 +236,7 @@ export default function GameContainer() {
 
       {/* Mode Tabs */}
       <Tabs value={mode} onValueChange={(v) => {
-        if (isTestActive) return; // Prevent switching during test
+        if (isTestActive) return; 
         setMode(v as GameMode);
       }} className="w-full">
         <TabsList className="grid grid-cols-3 h-auto p-2 bg-white rounded-3xl border-2 border-primary/10 gap-2 mb-8 max-w-2xl mx-auto">
@@ -270,7 +271,7 @@ export default function GameContainer() {
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                       <h2 className="text-2xl font-bold flex items-center gap-2">
                           {mode === 'challenge' ? <Trophy className="text-primary" /> : <GraduationCap className="text-primary" />}
-                          {mode === 'challenge' ? `Question ${testIndex + 1} of 50` : `Identify this note:`}
+                          {mode === 'challenge' ? `Note ${testIndex + 1} of 50` : `What note is this?`}
                       </h2>
                       {!isTestActive && (
                         <div className="flex bg-muted p-1 rounded-xl">
@@ -331,7 +332,7 @@ export default function GameContainer() {
           <TabsContent value="find" className="mt-0 space-y-6">
             <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 text-center space-y-8">
                <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Keyboard className="text-primary" /> Locate on Keyboard:
+                    <Keyboard className="text-primary" /> Find on Keyboard:
                 </h2>
                 <div className="py-12 bg-primary/5 rounded-[2rem] border-4 border-dashed border-primary/20">
                     <span className="text-8xl font-black text-primary animate-pulse">
@@ -341,7 +342,7 @@ export default function GameContainer() {
                 </div>
                 <div className="flex justify-center gap-4">
                   <Button size="lg" onClick={() => currentNote && playNote(noteToTone(currentNote))} className="rounded-2xl gap-2 h-16 px-8 text-xl font-bold shadow-lg">
-                    <Music /> Play Sound
+                    <Music /> Listen
                   </Button>
                 </div>
             </Card>
@@ -354,13 +355,13 @@ export default function GameContainer() {
                     <Trophy size={48} />
                 </div>
                 <div className="space-y-4">
-                  <h2 className="text-4xl font-black">The 50 Note Challenge</h2>
+                  <h2 className="text-4xl font-black">50 Note Mastery</h2>
                   <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-                    Test your musical skills! Can you identify 50 notes across both clefs without missing a beat?
+                    A comprehensive test across both clefs (C2–C7). Can you identify all 50 notes perfectly?
                   </p>
                 </div>
                 <Button onClick={startChallenge} size="lg" className="rounded-2xl h-20 px-12 text-2xl font-bold shadow-xl gap-3">
-                  <PlayCircle size={32} /> Start Challenge
+                  <PlayCircle size={32} /> Begin Test
                 </Button>
               </Card>
             )}
@@ -376,26 +377,6 @@ export default function GameContainer() {
           />
       </div>
 
-      {/* Achievements/Badges */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className={cn("p-6 rounded-3xl bg-white border-2 flex flex-col items-center text-center gap-3 transition-all", score >= 100 ? "border-primary shadow-lg" : "border-muted opacity-40")}>
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Award /></div>
-              <p className="font-bold">Rising Star</p>
-          </div>
-          <div className={cn("p-6 rounded-3xl bg-white border-2 flex flex-col items-center text-center gap-3 transition-all", accuracy === 100 && attempts >= 10 ? "border-green-400 shadow-lg" : "border-muted opacity-40")}>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600"><Award /></div>
-              <p className="font-bold">Perfect Pitch</p>
-          </div>
-          <div className={cn("p-6 rounded-3xl bg-white border-2 flex flex-col items-center text-center gap-3 transition-all", score >= 500 ? "border-purple-400 shadow-lg" : "border-muted opacity-40")}>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600"><Sparkles /></div>
-              <p className="font-bold">Music Master</p>
-          </div>
-          <div className={cn("p-6 rounded-3xl bg-white border-2 flex flex-col items-center text-center gap-3 transition-all", attempts >= 50 ? "border-orange-400 shadow-lg" : "border-muted opacity-40")}>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600"><GraduationCap /></div>
-              <p className="font-bold">Scholar</p>
-          </div>
-      </div>
-
       {/* Results Dialog */}
       <AlertDialog open={showResults} onOpenChange={setShowResults}>
         <AlertDialogContent className="rounded-[2.5rem] p-8">
@@ -403,16 +384,16 @@ export default function GameContainer() {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                <Trophy size={40} />
             </div>
-            <AlertDialogTitle className="text-3xl font-black">Challenge Complete!</AlertDialogTitle>
+            <AlertDialogTitle className="text-3xl font-black">Test Complete!</AlertDialogTitle>
             <AlertDialogDescription className="text-xl">
-              You correctly identified <span className="font-bold text-foreground">{testCorrectCount}</span> out of <span className="font-bold text-foreground">50</span> notes.
+              You scored <span className="font-bold text-foreground">{testCorrectCount}</span> out of <span className="font-bold text-foreground">50</span>.
               <br />
-              That's an accuracy of <span className="font-bold text-primary">{Math.round((testCorrectCount / 50) * 100)}%</span>!
+              Accuracy: <span className="font-bold text-primary">{Math.round((testCorrectCount / 50) * 100)}%</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center mt-6">
             <AlertDialogAction onClick={() => {setShowResults(false); setMode('identify');}} className="rounded-xl h-14 px-8 text-lg font-bold">
-              Awesome! Keep Practicing
+              Return to Practice
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
