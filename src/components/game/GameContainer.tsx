@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -20,7 +19,7 @@ import {
   generateRandomNote
 } from '@/lib/music-logic';
 import { musicSystemConfig } from '@/lib/music-system';
-import { Music, Keyboard, GraduationCap, RotateCcw, Trophy, PlayCircle, Volume2, Sparkles, LayoutDashboard, BrainCircuit, Loader2, BookOpen } from 'lucide-react';
+import { Music, Keyboard, GraduationCap, RotateCcw, Trophy, PlayCircle, Volume2, Sparkles, LayoutDashboard, BrainCircuit, Loader2, BookOpen, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useAuth, useFirestore, useCollection } from '@/firebase';
 import { collection, doc, query, orderBy, limit } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -53,7 +52,7 @@ export default function GameContainer() {
   const db = useFirestore();
 
   // Core State
-  const [mode, setMode] = useState<GameMode>('identify');
+  const [mode, setMode] = useState<GameMode>('study');
   const [clef, setClef] = useState<'treble' | 'bass'>('treble');
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
@@ -308,44 +307,55 @@ export default function GameContainer() {
           </Button>
         </div>
 
-        <div className="relative min-h-[440px]">
+        <div className="relative min-h-[500px]">
           <FeedbackOverlay 
             status={status} 
             onFinished={() => { if (!isTestActive) { setStatus(null); generateNextRound(); } }} 
           />
 
           {mode === 'study' && (
-            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 space-y-8">
-              <div className="text-center space-y-2">
-                <h2 className="text-3xl font-black">Interaktivní Stupnice</h2>
-                <p className="text-muted-foreground">Posouvejte posuvníkem a sledujte noty od C4 do C7.</p>
+            <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-10 space-y-10">
+              <div className="text-center space-y-3">
+                <h2 className="text-4xl font-black text-primary tracking-tight">Interaktivní Stupnice</h2>
+                <p className="text-xl text-muted-foreground font-medium">Sledujte tóny od C4 do C7 a učte se jejich názvy.</p>
               </div>
               
-              <div className="bg-muted/30 p-8 rounded-[2rem] border-2 border-dashed border-primary/20">
-                {currentNote && <StaffRenderer clef={clef} note={currentNote} showName />}
+              <div className="bg-muted/30 p-10 rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[340px]">
+                {currentNote && <StaffRenderer clef={clef} note={currentNote} showName className="h-full border-none shadow-none bg-transparent" />}
               </div>
 
-              <div className="space-y-6">
-                <div className="flex justify-between font-bold text-sm px-2">
-                   <span>C4 (Middle C)</span>
-                   <span>C7 (High)</span>
+              <div className="space-y-8 max-w-3xl mx-auto">
+                <div className="flex justify-between items-center gap-4">
+                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.max(60, m - 1))}>
+                    <ChevronLeft size={24} />
+                  </Button>
+                  <div className="flex-1 space-y-4">
+                    <div className="flex justify-between font-bold text-sm px-2 text-muted-foreground uppercase tracking-widest">
+                       <span>C4</span>
+                       <span>C7</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="60" 
+                      max="96" 
+                      value={studyMidi} 
+                      onChange={(e) => {
+                        const m = parseInt(e.target.value);
+                        setStudyMidi(m);
+                        setClef(m < 60 ? 'bass' : 'treble');
+                        playNote(noteToTone(midiToNote(m)));
+                      }}
+                      className="w-full h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
+                    />
+                  </div>
+                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.min(96, m + 1))}>
+                    <ChevronRight size={24} />
+                  </Button>
                 </div>
-                <input 
-                  type="range" 
-                  min="60" 
-                  max="96" 
-                  value={studyMidi} 
-                  onChange={(e) => {
-                    const m = parseInt(e.target.value);
-                    setStudyMidi(m);
-                    setClef(m < 60 ? 'bass' : 'treble');
-                    playNote(noteToTone(midiToNote(m)));
-                  }}
-                  className="w-full h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
-                />
+                
                 <div className="flex justify-center gap-4">
-                   <Button variant={clef === 'treble' ? 'default' : 'outline'} onClick={() => setClef('treble')} className="rounded-xl font-bold">Houslový klíč</Button>
-                   <Button variant={clef === 'bass' ? 'default' : 'outline'} onClick={() => setClef('bass')} className="rounded-xl font-bold">Basový klíč</Button>
+                   <Button variant={clef === 'treble' ? 'default' : 'outline'} onClick={() => setClef('treble')} className="h-12 px-8 rounded-2xl font-bold shadow-sm">Houslový klíč</Button>
+                   <Button variant={clef === 'bass' ? 'default' : 'outline'} onClick={() => setClef('bass')} className="h-12 px-8 rounded-2xl font-bold shadow-sm">Basový klíč</Button>
                 </div>
               </div>
             </Card>
