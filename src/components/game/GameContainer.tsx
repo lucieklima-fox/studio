@@ -10,14 +10,15 @@ import { FeedbackOverlay } from './FeedbackOverlay';
 import { usePiano } from '@/hooks/use-piano';
 import { 
   MusicalNote, 
-  generateRandomNote, 
+  generateRandomNoteFromPool, 
   isCorrectAnswer, 
   noteToTone, 
+  toneToMidi,
   NoteLetter, 
   Accidental
 } from '@/lib/music-logic';
 import { musicSystemConfig } from '@/lib/music-system';
-import { Sparkles, Music, Keyboard, GraduationCap, RotateCcw, Award } from 'lucide-react';
+import { Music, Keyboard, GraduationCap, RotateCcw, Award, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth, useFirestore } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
@@ -39,13 +40,18 @@ export default function GameContainer() {
   const [selectedAccidental, setSelectedAccidental] = useState<Accidental>('natural');
 
   const generateNextRound = useCallback(() => {
-    // Use the validated MIDI pool from config
-    const newNote = generateRandomNote(clef, musicSystemConfig.allowedStaffMidis, true);
+    // Only pick notes appropriate for the selected clef from the pool
+    const pool = musicSystemConfig.allowedStaffMidis.filter(midi => {
+      // Simple range filter for beginners per clef
+      if (clef === 'treble') return midi >= 57 && midi <= 81; // A3 to A5
+      return midi >= 38 && midi <= 62; // D2 to D4
+    });
+
+    const newNote = generateRandomNoteFromPool(clef, pool);
     setCurrentNote(newNote);
     setStatus(null);
   }, [clef]);
 
-  // Initialize first game
   useEffect(() => {
     generateNextRound();
   }, [mode, clef, generateNextRound]);
@@ -82,16 +88,13 @@ export default function GameContainer() {
   const handleNoteClick = useCallback((noteId: string) => {
     if (status) return;
     
-    // Play sound immediately for feedback
     playNote(noteId);
 
     if (currentNote) {
-      // Find the note object corresponding to the key ID
-      const letter = noteId.slice(0, 1) as NoteLetter;
-      const octave = parseInt(noteId.slice(-1));
-      const accidental: Accidental = noteId.includes('#') ? 'sharp' : 'natural';
+      const pressedMidi = toneToMidi(noteId);
+      const correctMidi = toneToMidi(noteToTone(currentNote));
 
-      const correct = isCorrectAnswer(currentNote, { letter, octave, accidental });
+      const correct = pressedMidi === correctMidi;
       setAttempts(a => a + 1);
       if (correct) {
         setScore(s => s + 10);
@@ -126,13 +129,10 @@ export default function GameContainer() {
   };
 
   const accuracy = attempts > 0 ? Math.round((score / (attempts * 10)) * 100) : 100;
-
-  // Derive active notes for keyboard display
   const activeNotes = status === 'correct' && currentNote ? [noteToTone(currentNote)] : [];
 
   return (
     <div className="container mx-auto max-w-5xl py-8 px-4 space-y-8">
-      {/* Header & Stats */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-6 rounded-3xl shadow-sm border-2 border-primary/20">
         <div className="flex items-center gap-4">
           <div className="bg-primary p-3 rounded-2xl shadow-lg">
@@ -177,7 +177,7 @@ export default function GameContainer() {
         <div className="relative overflow-hidden min-h-[420px]">
           <FeedbackOverlay 
             status={status} 
-            message={status === 'incorrect' ? `Not quite!` : `Correct!`} 
+            message={status === 'incorrect' ? `Try again!` : `Correct!`} 
             onFinished={() => {setStatus(null); generateNextRound();}} 
           />
 

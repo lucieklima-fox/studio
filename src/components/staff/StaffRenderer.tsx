@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { MusicalNote, Clef, midiToStaffIndex, noteToMidi, getLedgerLineIndices } from '@/lib/music-logic';
+import { MusicalNote, Clef, midiToStaffIndex, noteToMidi, getLedgerLines } from '@/lib/music-logic';
 
 interface StaffRendererProps {
   clef: Clef;
@@ -10,29 +10,24 @@ interface StaffRendererProps {
   className?: string;
 }
 
-const STEP_Y = 10; // Half distance between lines
-const STAFF_BASE_Y = 110; // Y coordinate for the "Bottom Line" index 1 (treble) or -1 (bass)
+const STEP_Y = 10; // Distance between a line and a space
+const STAFF_BOTTOM_Y = 110; // Y coordinate for index 0 (E4 in treble, G2 in bass)
 
 export function StaffRenderer({ clef, note, className }: StaffRendererProps) {
-  const staffIndex = note ? midiToStaffIndex(noteToMidi(note), clef) : null;
+  const midi = note ? noteToMidi(note) : null;
+  const staffIndex = midi !== null ? midiToStaffIndex(midi, clef) : null;
   const isSharp = note?.accidental === 'sharp';
 
-  // Calculate Y based on staffIndex and clef anchors
+  // Calculate Y based on staffIndex (0 = bottom line)
   const getNoteY = (index: number) => {
-    if (clef === 'treble') {
-      // Index 1 (E4) is at 110. 
-      return STAFF_BASE_Y - (index - 1) * STEP_Y;
-    } else {
-      // Index -1 (G2) is at 110.
-      return STAFF_BASE_Y - (index - (-1)) * STEP_Y;
-    }
+    return STAFF_BOTTOM_Y - index * STEP_Y;
   };
 
   const noteY = staffIndex !== null ? getNoteY(staffIndex) : null;
-  const ledgerIndices = staffIndex !== null ? getLedgerLineIndices(staffIndex, clef) : [];
+  const ledgerIndices = staffIndex !== null ? getLedgerLines(staffIndex) : [];
 
-  // Static staff lines (Indices 1,3,5,7,9 for Treble; -1,1,3,5,7 for Bass)
-  const STAFF_LINES = [30, 50, 70, 90, 110];
+  // Static staff lines are at index 0, 2, 4, 6, 8
+  const STAFF_LINES = [0, 2, 4, 6, 8].map(idx => getNoteY(idx));
 
   return (
     <div className={cn("relative w-full h-56 flex items-center justify-center bg-white rounded-3xl shadow-inner border-4 border-primary/10 p-6", className)}>
@@ -48,10 +43,10 @@ export function StaffRenderer({ clef, note, className }: StaffRendererProps) {
         ))}
 
         {/* Vertical Bar Lines */}
-        <line x1="50" y1="30" x2="50" y2="110" stroke="#333" strokeWidth="3" />
-        <line x1="350" y1="30" x2="350" y2="110" stroke="#333" strokeWidth="3" />
+        <line x1="50" y1={getNoteY(8)} x2="50" y2={getNoteY(0)} stroke="#333" strokeWidth="3" />
+        <line x1="350" y1={getNoteY(8)} x2="350" y2={getNoteY(0)} stroke="#333" strokeWidth="3" />
 
-        {/* Clef Icons (Simple SVG representations) */}
+        {/* Clef Icons */}
         {clef === 'treble' ? (
           <path d="M75 125 Q 95 105 75 85 T 75 45 Q 65 35 65 45 L 75 130" fill="none" stroke="#333" strokeWidth="4" strokeLinecap="round" />
         ) : (
@@ -95,10 +90,10 @@ export function StaffRenderer({ clef, note, className }: StaffRendererProps) {
             
             {/* Note Stem */}
             <line 
-              x1={staffIndex > 5 ? "187" : "213"} 
+              x1={staffIndex !== null && staffIndex > 4 ? "187" : "213"} 
               y1={noteY} 
-              x2={staffIndex > 5 ? "187" : "213"} 
-              y2={staffIndex > 5 ? noteY + 50 : noteY - 50} 
+              x2={staffIndex !== null && staffIndex > 4 ? "187" : "213"} 
+              y2={staffIndex !== null && staffIndex > 4 ? noteY + 50 : noteY - 50} 
               stroke="black" 
               strokeWidth="2.5" 
             />
