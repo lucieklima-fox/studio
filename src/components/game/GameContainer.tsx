@@ -14,10 +14,10 @@ import {
   isCorrectAnswer, 
   noteToTone, 
   NoteLetter, 
-  Accidental 
+  Accidental
 } from '@/lib/music-logic';
+import { musicSystemConfig } from '@/lib/music-system';
 import { Sparkles, Music, Keyboard, GraduationCap, RotateCcw, Award } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useAuth, useFirestore } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
@@ -38,16 +38,17 @@ export default function GameContainer() {
   const [status, setStatus] = useState<'correct' | 'incorrect' | null>(null);
   const [selectedAccidental, setSelectedAccidental] = useState<Accidental>('natural');
 
-  // Initialize first game
-  useEffect(() => {
-    generateNextRound();
-  }, [mode, clef]);
-
   const generateNextRound = useCallback(() => {
-    const newNote = generateRandomNote(clef, true);
+    // Use the validated MIDI pool from config
+    const newNote = generateRandomNote(clef, musicSystemConfig.allowedStaffMidis, true);
     setCurrentNote(newNote);
     setStatus(null);
   }, [clef]);
+
+  // Initialize first game
+  useEffect(() => {
+    generateNextRound();
+  }, [mode, clef, generateNextRound]);
 
   const logSession = useCallback((isCorrect: boolean) => {
     if (!user || !db || !currentNote) return;
@@ -81,15 +82,15 @@ export default function GameContainer() {
   const handleNoteClick = useCallback((noteId: string) => {
     if (status) return;
     
-    // noteId format "C4" or "C#4"
-    const letter = noteId.charAt(0) as NoteLetter;
-    const isSharp = noteId.includes('#');
-    const accidental: Accidental = isSharp ? 'sharp' : 'natural';
-    const octave = parseInt(noteId.slice(-1));
-
+    // Play sound immediately for feedback
     playNote(noteId);
 
     if (currentNote) {
+      // Find the note object corresponding to the key ID
+      const letter = noteId.slice(0, 1) as NoteLetter;
+      const octave = parseInt(noteId.slice(-1));
+      const accidental: Accidental = noteId.includes('#') ? 'sharp' : 'natural';
+
       const correct = isCorrectAnswer(currentNote, { letter, octave, accidental });
       setAttempts(a => a + 1);
       if (correct) {
@@ -126,6 +127,9 @@ export default function GameContainer() {
 
   const accuracy = attempts > 0 ? Math.round((score / (attempts * 10)) * 100) : 100;
 
+  // Derive active notes for keyboard display
+  const activeNotes = status === 'correct' && currentNote ? [noteToTone(currentNote)] : [];
+
   return (
     <div className="container mx-auto max-w-5xl py-8 px-4 space-y-8">
       {/* Header & Stats */}
@@ -136,7 +140,7 @@ export default function GameContainer() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-foreground">Melody Maestro</h1>
-            <p className="text-muted-foreground font-medium">Learn notes with precision!</p>
+            <p className="text-muted-foreground font-medium">Safe & Sound Music Learning</p>
           </div>
         </div>
 
@@ -173,7 +177,7 @@ export default function GameContainer() {
         <div className="relative overflow-hidden min-h-[420px]">
           <FeedbackOverlay 
             status={status} 
-            message={status === 'incorrect' ? `Try again!` : `Correct!`} 
+            message={status === 'incorrect' ? `Not quite!` : `Correct!`} 
             onFinished={() => {setStatus(null); generateNextRound();}} 
           />
 
@@ -182,7 +186,7 @@ export default function GameContainer() {
               <CardContent className="p-8 space-y-8">
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <h2 className="text-2xl font-bold flex items-center gap-2">
-                        <GraduationCap className="text-primary" /> What's this note?
+                        <GraduationCap className="text-primary" /> Identify this note:
                     </h2>
                     <div className="flex bg-muted p-1 rounded-xl">
                         <Button variant={clef === 'treble' ? 'default' : 'ghost'} onClick={() => setClef('treble')} className="rounded-lg font-bold">Treble</Button>
@@ -193,7 +197,6 @@ export default function GameContainer() {
                 {currentNote && <StaffRenderer clef={clef} note={currentNote} />}
 
                 <div className="space-y-6">
-                  {/* Accidental Toggle */}
                   <div className="flex justify-center gap-3">
                     <Button 
                       variant={selectedAccidental === 'natural' ? 'default' : 'outline'} 
@@ -231,7 +234,7 @@ export default function GameContainer() {
           <TabsContent value="find" className="mt-0 space-y-6">
             <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 text-center space-y-8">
                <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-                    <Keyboard className="text-primary" /> Find this note on the piano!
+                    <Keyboard className="text-primary" /> Locate on Keyboard:
                 </h2>
                 <div className="py-12 bg-primary/5 rounded-[2rem] border-4 border-dashed border-primary/20">
                     <span className="text-8xl font-black text-primary animate-pulse">
@@ -241,7 +244,7 @@ export default function GameContainer() {
                 </div>
                 <div className="flex justify-center gap-4">
                   <Button size="lg" onClick={() => currentNote && playNote(noteToTone(currentNote))} className="rounded-2xl gap-2 h-16 px-8 text-xl font-bold shadow-lg">
-                    <Music /> Hear Tone
+                    <Music /> Play Sound
                   </Button>
                 </div>
             </Card>
@@ -249,15 +252,13 @@ export default function GameContainer() {
         </div>
       </Tabs>
 
-      {/* Keyboard Always Visible */}
       <div className="bg-white p-8 rounded-[3rem] shadow-2xl border-t-8 border-primary">
           <PianoKeyboard 
-            activeNotes={status === 'correct' ? [noteToTone(currentNote!)] : []} 
+            activeNotes={activeNotes} 
             onNoteClick={handleNoteClick} 
           />
       </div>
 
-      {/* Stats/Badges Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className={cn("p-6 rounded-3xl bg-white border-2 flex flex-col items-center text-center gap-3 transition-all", score >= 100 ? "border-primary shadow-lg" : "border-muted opacity-40")}>
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary"><Award /></div>

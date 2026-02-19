@@ -26,8 +26,6 @@ const LETTER_TO_DIATONIC: Record<NoteLetter, number> = {
   'C': 0, 'D': 1, 'E': 2, 'F': 3, 'G': 4, 'A': 5, 'B': 6
 };
 
-const DIATONIC_TO_LETTER: NoteLetter[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-
 /**
  * Returns the deterministic MIDI number for a given note.
  * C4 = 60.
@@ -39,7 +37,6 @@ export function noteToMidi(note: MusicalNote): number {
 
 /**
  * Returns a MusicalNote object from a MIDI number.
- * Defaults to natural notes or sharps.
  */
 export function midiToNote(midi: number, clef: Clef): MusicalNote {
   const octave = Math.floor(midi / 12) - 1;
@@ -65,11 +62,10 @@ export function noteToTone(note: MusicalNote): string {
 
 /**
  * Calculates the diatonic staff index (line/space steps).
- * Treble: Bottom line (E4) = 1. Middle C (C4) = -1.
- * Bass: Bottom line (G2) = -1. Middle C (C4) = 9.
+ * Treble Anchor: E4 (MIDI 64) = 1.
+ * Bass Anchor: G2 (MIDI 43) = -1.
  */
 export function midiToStaffIndex(midi: number, clef: Clef): number {
-  // Get natural note part (ignore accidental for staff positioning)
   const octave = Math.floor(midi / 12) - 1;
   const semitone = midi % 12;
   const letter = SEMITONE_TO_LETTER[semitone];
@@ -77,13 +73,9 @@ export function midiToStaffIndex(midi: number, clef: Clef): number {
   const absoluteStep = octave * 7 + LETTER_TO_DIATONIC[letter];
   
   if (clef === 'treble') {
-    // Treble Anchor: E4 (MIDI 64) is Index 1. 
-    // Absolute step for E4 is 4 * 7 + 2 = 30.
-    return absoluteStep - 30 + 1;
+    return absoluteStep - 30 + 1; // E4 = 30 absolute steps
   } else {
-    // Bass Anchor: G2 (MIDI 43) is Index -1.
-    // Absolute step for G2 is 2 * 7 + 4 = 18.
-    return absoluteStep - 18 - 1;
+    return absoluteStep - 18 - 1; // G2 = 18 absolute steps
   }
 }
 
@@ -96,33 +88,15 @@ export function getLedgerLineIndices(staffIndex: number, clef: Clef): number[] {
   const maxLine = clef === 'treble' ? 9 : 7;
 
   if (staffIndex < minLine) {
-    // Even indices are spaces, odd are lines. 
-    // Start from the first line below the staff.
     for (let i = minLine - 2; i >= staffIndex; i -= 2) {
       lines.push(i);
     }
   } else if (staffIndex > maxLine) {
-    // Start from the first line above the staff.
     for (let i = maxLine + 2; i <= staffIndex; i += 2) {
       lines.push(i);
     }
   }
   return lines;
-}
-
-/**
- * Maps a staff index back to a MIDI number (natural note).
- */
-export function staffIndexToMidi(index: number, clef: Clef): number {
-  const anchorAbsoluteStep = clef === 'treble' ? 30 : 18;
-  const anchorStaffOffset = clef === 'treble' ? 1 : -1;
-  
-  const targetAbsoluteStep = index - anchorStaffOffset + anchorAbsoluteStep;
-  const octave = Math.floor(targetAbsoluteStep / 7);
-  const diatonicIndex = ((targetAbsoluteStep % 7) + 7) % 7;
-  const letter = DIATONIC_TO_LETTER[diatonicIndex];
-  
-  return (octave + 1) * 12 + LETTER_TO_SEMITONE[letter];
 }
 
 /**
@@ -133,32 +107,25 @@ export function isCorrectAnswer(generated: MusicalNote, userAnswer: Partial<Musi
   
   const generatedMidi = noteToMidi(generated);
   const userMidi = noteToMidi({
-    ...generated, // default clef
+    ...generated,
     letter: userAnswer.letter,
     octave: userAnswer.octave,
-    accidental: userAnswer.accidental
+    accidental: userAnswer.accidental as Accidental
   });
 
   return generatedMidi === userMidi;
 }
 
 /**
- * Generates a random note within a safe staff range.
+ * Generates a random note from the validated subset of staff-safe notes.
  */
-export function generateRandomNote(clef: Clef, includeSharps: boolean = true): MusicalNote {
-  // Safe staff range: approx 2 ledger lines below to 2 above
-  const min = clef === 'treble' ? -3 : -5;
-  const max = clef === 'treble' ? 13 : 11;
+export function generateRandomNote(clef: Clef, allowedMidis: number[], includeSharps: boolean = true): MusicalNote {
+  const randomMidi = allowedMidis[Math.floor(Math.random() * allowedMidis.length)];
+  const note = midiToNote(randomMidi, clef);
   
-  const staffIndex = Math.floor(Math.random() * (max - min + 1)) + min;
-  const baseMidi = staffIndexToMidi(staffIndex, clef);
-  const note = midiToNote(baseMidi, clef);
-  
-  if (includeSharps && Math.random() > 0.7) {
-    // Only add sharp if standard (no E# or B# for beginners)
-    if (note.letter !== 'E' && note.letter !== 'B') {
-      note.accidental = 'sharp';
-    }
+  // Refine for beginner experience: Avoid E# and B# if possible
+  if (note.accidental === 'sharp' && !includeSharps) {
+    note.accidental = 'natural';
   }
 
   return note;
