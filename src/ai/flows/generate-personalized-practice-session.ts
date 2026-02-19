@@ -11,7 +11,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const PersonalizedPracticeSessionGeneratorInputSchema = z.object({
-  challengingNotes: z.array(z.string()).describe('Notes that the child frequently struggles with, e.g., ["C4", "F#5"].'),
+  challengingNotes: z.array(z.string()).describe('Notes that the child frequently struggles with, e.g., ["C4", "F#4"].'),
   challengingClefs: z.array(z.enum(['treble', 'bass'])).describe('Clefs that the child frequently struggles with, e.g., ["treble"].'),
   recentPerformanceSummary: z.string().optional().describe('An optional summary of the child\'s recent performance, providing context for personalization.'),
 });
@@ -36,6 +36,8 @@ const personalizedPracticePrompt = ai.definePrompt({
   output: { schema: PersonalizedPracticeSessionGeneratorOutputSchema },
   prompt: `You are a friendly and encouraging music teacher for children aged 6-12. Your task is to create a personalized practice exercise based on a child's recent performance. The goal is to help them improve on notes or clefs they find challenging.
 
+The curriculum focus is strictly between C2 and C5.
+
 Here is what the child has been struggling with:
 {{#if challengingNotes}}
 Challenging Notes: {{{challengingNotes}}}
@@ -47,9 +49,9 @@ Challenging Clefs: {{{challengingClefs}}}
 Recent Performance Summary: {{{recentPerformanceSummary}}}
 {{/if}}
 
-Based on this information, design a single, focused practice exercise. Choose an 'exerciseType' from 'identify_note_on_staff', 'find_note_on_keyboard', or 'simple_note_sequence'. If both clefs are challenging, you can suggest 'mixed'. Provide clear, encouraging instructions. Suggest a 'difficultyLevel' (easy, medium, hard) appropriate for targeted practice.
+Based on this information, design a single, focused practice exercise within the C2-C5 range. Choose an 'exerciseType' from 'identify_note_on_staff', 'find_note_on_keyboard', or 'simple_note_sequence'. If both clefs are challenging, you can suggest 'mixed'. Provide clear, encouraging instructions. Suggest a 'difficultyLevel' (easy, medium, hard) appropriate for targeted practice.
 
-Make sure the 'focusNotes' array contains specific notes that are relevant to the identified challenges and clefs.`,
+Make sure the 'focusNotes' array contains specific notes that are relevant to the identified challenges and clefs, and are strictly within C2 to C5.`,
 });
 
 const personalizedPracticeSessionGeneratorFlow = ai.defineFlow(

@@ -16,7 +16,7 @@ export const PIANO_KEYS = [
   { name: 'B', type: 'white' },
 ] as const;
 
-export const OCTAVES = [3, 4, 5] as const;
+export const OCTAVES = [2, 3, 4, 5] as const;
 
 export type FullNote = {
   name: NoteName;
@@ -33,8 +33,8 @@ export const ALL_NOTES: FullNote[] = OCTAVES.flatMap(octave =>
 );
 
 export const STAFF_RANGES = {
-  treble: { min: 'C4', max: 'G5' },
-  bass: { min: 'F2', max: 'C4' },
+  treble: { min: 'C4', max: 'C5' },
+  bass: { min: 'C2', max: 'C4' },
 };
 
 export const MELODIES = [

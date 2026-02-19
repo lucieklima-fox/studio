@@ -317,7 +317,7 @@ export default function GameContainer() {
             <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-10 space-y-10">
               <div className="text-center space-y-3">
                 <h2 className="text-4xl font-black text-primary tracking-tight">Interaktivní Stupnice</h2>
-                <p className="text-xl text-muted-foreground font-medium">Sledujte tóny od C4 do C7 a učte se jejich názvy.</p>
+                <p className="text-xl text-muted-foreground font-medium">Sledujte tóny od C2 do C5 a učte se jejich názvy.</p>
               </div>
               
               <div className="bg-muted/30 p-10 rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[340px]">
@@ -326,18 +326,18 @@ export default function GameContainer() {
 
               <div className="space-y-8 max-w-3xl mx-auto">
                 <div className="flex justify-between items-center gap-4">
-                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.max(60, m - 1))}>
+                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.max(36, m - 1))}>
                     <ChevronLeft size={24} />
                   </Button>
                   <div className="flex-1 space-y-4">
                     <div className="flex justify-between font-bold text-sm px-2 text-muted-foreground uppercase tracking-widest">
-                       <span>C4</span>
-                       <span>C7</span>
+                       <span>C2</span>
+                       <span>C5</span>
                     </div>
                     <input 
                       type="range" 
-                      min="60" 
-                      max="96" 
+                      min="36" 
+                      max="72" 
                       value={studyMidi} 
                       onChange={(e) => {
                         const m = parseInt(e.target.value);
@@ -348,7 +348,7 @@ export default function GameContainer() {
                       className="w-full h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
                     />
                   </div>
-                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.min(96, m + 1))}>
+                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.min(72, m + 1))}>
                     <ChevronRight size={24} />
                   </Button>
                 </div>
@@ -431,7 +431,7 @@ export default function GameContainer() {
                     <Trophy size={48} />
                 </div>
                 <h2 className="text-4xl font-black">Mistrovství 50 Not</h2>
-                <p className="text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C7.</p>
+                <p className="text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C5.</p>
                 <Button onClick={() => { setIsTestActive(true); setTestIndex(0); setTestCorrectCount(0); }} size="lg" className="rounded-2xl h-20 px-12 text-2xl font-bold shadow-xl">
                   Spustit Test
                 </Button>

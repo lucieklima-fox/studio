@@ -9,7 +9,7 @@ import { midiToNote, noteToMidi, midiToStaffIndex } from './music-logic';
 
 export const KEYBOARD_RANGE = {
   minMidi: 36, // C2
-  maxMidi: 96  // C7
+  maxMidi: 72  // C5
 };
 
 export type MusicSystemConfig = {
@@ -31,7 +31,7 @@ export function validateMusicSystem(config: MusicSystemConfig): void {
   const maxMidi = Math.max(...keyboardMidis);
 
   if (minMidi < KEYBOARD_RANGE.minMidi) throw new Error("Music system configuration invalid: Keyboard below C2");
-  if (maxMidi > KEYBOARD_RANGE.maxMidi) throw new Error("Music system configuration invalid: Keyboard above C7");
+  if (maxMidi > KEYBOARD_RANGE.maxMidi) throw new Error("Music system configuration invalid: Keyboard above C5");
 
   // Integrity Check: Every staff note must be playable
   const keySet = new Set(keyboardMidis);
@@ -72,7 +72,7 @@ function deriveStaffNotes(keyboardMidis: number[]): number[] {
 /**
  * Bootstraps the music system with validated ranges.
  */
-export function initializeMusicSystem(startMidi: number = 36, keyCount: number = 61): MusicSystemConfig {
+export function initializeMusicSystem(startMidi: number = 36, keyCount: number = 37): MusicSystemConfig {
   const keyboardMidis = Array.from({ length: keyCount }, (_, i) => startMidi + i);
   const allowedStaffMidis = deriveStaffNotes(keyboardMidis);
 

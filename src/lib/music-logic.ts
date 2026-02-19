@@ -10,7 +10,7 @@
 
 export const KEYBOARD_RANGE = {
   minMidi: 36, // C2
-  maxMidi: 96  // C7
+  maxMidi: 72  // C5
 };
 
 const letterIndexMap: Record<string, number> = {

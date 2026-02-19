@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { PIANO_KEYS, OCTAVES } from '@/lib/music-constants';
 import { cn } from '@/lib/utils';
+import { midiToNote, noteToMidi } from '@/lib/music-logic';
 
 interface PianoKeyboardProps {
   activeNotes?: string[];
@@ -18,13 +19,25 @@ export function PianoKeyboard({
   className 
 }: PianoKeyboardProps) {
   const allKeys = useMemo(() => {
+    // Generate keys for octaves 2, 3, 4, 5
+    // Filter to strictly stay within C2 (MIDI 36) to C5 (MIDI 72)
     return OCTAVES.flatMap(octave => 
-      PIANO_KEYS.map(key => ({
-        ...key,
-        octave,
-        id: `${key.name}${octave}`
-      }))
-    );
+      PIANO_KEYS.map(key => {
+        const id = `${key.name}${octave}`;
+        const midi = noteToMidi({
+          letter: key.name.replace('#', '') as any,
+          octave: octave,
+          accidental: key.name.includes('#') ? 'sharp' : 'natural',
+          clef: 'treble'
+        });
+        return {
+          ...key,
+          octave,
+          id,
+          midi
+        };
+      })
+    ).filter(key => key.midi >= 36 && key.midi <= 72);
   }, []);
 
   return (
