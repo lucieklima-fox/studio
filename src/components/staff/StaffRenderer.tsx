@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -48,12 +49,19 @@ export function StaffRenderer({ clef, note, className }: StaffRendererProps) {
 
         {/* Clef Icons */}
         {clef === 'treble' ? (
-          <path d="M75 125 Q 95 105 75 85 T 75 45 Q 65 35 65 45 L 75 130" fill="none" stroke="#333" strokeWidth="4" strokeLinecap="round" />
+          <g transform="translate(60, 45) scale(0.8)">
+             <path 
+                d="M17.3,87.6c-4.3-1.4-8-4.4-10.4-8.3c-2.1-3.3-3.1-7.1-3.1-11.1c0-10.4,6.7-19.4,16.7-22.5c1.4-0.4,2.9-0.7,4.4-0.7c2.1,0,4.1,0.5,5.9,1.4c1.1-6.1,2.1-12.1,3.1-18.2C30.4,18.8,26,10.1,21.5,1.4C21.2,0.8,21,0,21.8,0s1.2,0.8,1.5,1.4c3.8,7.3,7.6,14.6,11.4,21.9c1,1.9,1.6,4,1.8,6.2c0.7,7.2-0.8,14.5-2.2,21.7c-0.8,4.1-1.6,8.1-2.4,12.2c1.7,0.7,3.3,1.7,4.6,3c3.2,3.1,5.1,7.5,5.1,12.2c0,9.4-7.6,17-17,17c-2.4,0-4.6-0.5-6.7-1.4"
+                fill="none" stroke="#333" strokeWidth="4" strokeLinecap="round"
+             />
+          </g>
         ) : (
-          <g>
-            <path d="M70 45 Q 100 45 100 70 Q 100 100 70 110" fill="none" stroke="#333" strokeWidth="5" strokeLinecap="round" />
-            <circle cx="110" cy="60" r="3" fill="#333" />
-            <circle cx="110" cy="80" r="3" fill="#333" />
+          <g transform="translate(60, 45) scale(1.1)">
+            {/* Bass Clef (F-clef) anchor is the 4th line (index 6) */}
+            <path d="M0,25 C15,0 45,10 45,35 C45,55 30,70 0,75" fill="none" stroke="#333" strokeWidth="6" strokeLinecap="round" />
+            {/* Dots surrounding the F3 line (index 6) which is y=50 */}
+            <circle cx="55" cy="15" r="4" fill="#333" />
+            <circle cx="55" cy="35" r="4" fill="#333" />
           </g>
         )}
 
@@ -75,7 +83,7 @@ export function StaffRenderer({ clef, note, className }: StaffRendererProps) {
             
             {/* Sharp Sign */}
             {isSharp && (
-              <text x="160" y={noteY + 8} fontSize="28" fontWeight="bold" fill="#333" className="font-body">♯</text>
+              <text x="155" y={noteY + 10} fontSize="32" fontWeight="bold" fill="#333" className="font-body">♯</text>
             )}
 
             {/* Note Head */}
@@ -88,12 +96,12 @@ export function StaffRenderer({ clef, note, className }: StaffRendererProps) {
               transform={`rotate(-20 200 ${noteY})`} 
             />
             
-            {/* Note Stem */}
+            {/* Note Stem - direction flip based on position */}
             <line 
-              x1={staffIndex !== null && staffIndex > 4 ? "187" : "213"} 
+              x1={staffIndex !== null && staffIndex >= 4 ? "187" : "213"} 
               y1={noteY} 
-              x2={staffIndex !== null && staffIndex > 4 ? "187" : "213"} 
-              y2={staffIndex !== null && staffIndex > 4 ? noteY + 50 : noteY - 50} 
+              x2={staffIndex !== null && staffIndex >= 4 ? "187" : "213"} 
+              y2={staffIndex !== null && staffIndex >= 4 ? noteY + 50 : noteY - 50} 
               stroke="black" 
               strokeWidth="2.5" 
             />

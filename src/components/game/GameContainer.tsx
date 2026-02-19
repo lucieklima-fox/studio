@@ -16,7 +16,8 @@ import {
   NoteLetter, 
   Accidental,
   midiToNote,
-  noteToMidi
+  noteToMidi,
+  generateRandomNote
 } from '@/lib/music-logic';
 import { musicSystemConfig } from '@/lib/music-system';
 import { Music, Keyboard, GraduationCap, RotateCcw, Trophy, PlayCircle, Volume2, Sparkles, LayoutDashboard, BrainCircuit, Loader2 } from 'lucide-react';
@@ -88,11 +89,13 @@ export default function GameContainer() {
     }
   }, [user, auth]);
 
+  // Generate 50 unique-ish notes for challenge spanning C2-C7
   const challengeNotes = useMemo(() => {
     const sequence: MusicalNote[] = [];
     const pool = musicSystemConfig.allowedStaffMidis;
     for (let i = 0; i < 50; i++) {
       const midi = pool[Math.floor(Math.random() * pool.length)];
+      // Standard Clef split at Middle C (60)
       const targetClef = midi < 60 ? 'bass' : 'treble';
       sequence.push(midiToNote(midi, targetClef));
     }
@@ -113,13 +116,13 @@ export default function GameContainer() {
       return;
     }
 
+    // Filter current pool by selected clef
     const pool = musicSystemConfig.allowedStaffMidis.filter(midi => {
       if (clef === 'treble') return midi >= 60; 
       return midi < 60; 
     });
 
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    const newNote = midiToNote(pool[randomIndex], clef);
+    const newNote = generateRandomNote(clef, pool);
     setCurrentNote(newNote);
     setStatus(null);
   }, [clef, mode, isTestActive, testIndex, challengeNotes]);
@@ -185,8 +188,12 @@ export default function GameContainer() {
     playNote(noteId);
     if (currentNote) {
       const correctMidi = noteToMidi(currentNote);
-      // Simple tone to midi approx (doesn't need to be perfect for click)
-      const correct = noteToTone(currentNote) === noteId;
+      const pressedMidi = noteToMidi(midiToNote(0)); // Placeholder - we map from noteId
+      // Find the midi for the noteId string like "C4"
+      const pianoNotes = musicSystemConfig.keyboardMidis;
+      const match = pianoNotes.find(m => noteToTone(midiToNote(m)) === noteId);
+      
+      const correct = match === correctMidi;
       setAttempts(a => a + 1);
       if (correct) {
         setScore(s => s + 10);
