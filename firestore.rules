@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * MUSIC LEARNING APP SECURITY RULES
+     * 
+     * CORE PHILOSOPHY:
+     * This ruleset implements a strict user-ownership model for personal data while maintaining 
+     * a public, read-only repository for musical content (Notes, Melodies, and Badges). 
+     * 
+     * DATA STRUCTURE:
+     * - Private Data: Nested under /users/{userId} to ensure path-based authorization.
+     * - Public Data: Top-level collections (/notes, /melodies, /badges) accessible by all users.
+     * 
+     * KEY SECURITY DECISIONS:
+     * 1. Path-Based Ownership: We use the userId in the document path to verify identity 
+     *    against the request.auth.uid. This avoids expensive get() calls.
+     * 2. Relational Integrity: On creation, we ensure that the internal fields (like userId or id) 
+     *    match the path variables to prevent data being 'orphaned' or misattributed.
+     * 3. Read-Only Global Content: Collections defining the curriculum (Notes, Melodies) are 
+     *    readable by everyone but strictly unmodifiable by clients to prevent tampering 
+     *    with the learning logic or validation criteria.
+     * 4. Prototyping Flexibility: We enforce WHO can write but not WHAT they write (schema), 
+     *    allowing the frontend to evolve note-logging and session tracking rapidly.
+     */
+
+    // --- Global Helper Functions ---
+
+    /** Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** Combines ownership check with existence check for state-changing operations. */
+    function isExistingOwner(userId) {
+      return resource != null && isOwner(userId);
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for User Profiles. Users can only manage their own profile.
+     * @path /users/{userId}
+     * @allow (create) if the UID matches and the internal ID matches the path.
+     * @deny (update) if trying to change another user's profile or change the document ID.
+     * @principle Enforces strict path-based ownership and relational integrity.
+     */
+    match /users/{userId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for Practice Sessions. Scoped strictly to the parent user.
+       * @path /users/{userId}/practiceSessions/{sessionId}
+       * @allow (list) by the parent user to track their own progress.
+       * @deny (create) if the internal userId field doesn't match the path owner.
+       * @principle Hierarchical data protection using parent path variables.
+       */
+      match /practiceSessions/{sessionId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+        allow delete: if isExistingOwner(userId);
+      }
+    }
+
+    /**
+     * @description Globally accessible achievement definitions.
+     * @path /badges/{badgeId}
+     * @allow (get, list) for any user to see available achievements.
+     * @deny (write) for all client-side requests; badges are managed via admin/server.
+     * @principle Publicly readable, read-only content for application metadata.
+     */
+    match /badges/{badgeId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Canonical database of musical notes (e.g., treble-C4-sharp).
+     * @path /notes/{noteId}
+     * @allow (get, list) for the frontend to perform note-to-staff mapping and validation.
+     * @deny (write) to prevent users from altering the correct pitch or MIDI data.
+     * @principle Homogeneous security posture for static curriculum data.
+     */
+    match /notes/{noteId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Predefined melodies for practice modes.
+     * @path /melodies/{melodyId}
+     * @allow (get, list) for users to select songs to play.
+     * @deny (write) to ensure the integrity of practice material.
+     * @principle Read-only global access for shared educational resources.
+     */
+    match /melodies/{melodyId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+  }
+}

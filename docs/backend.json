@@ -1,0 +1,400 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Stores user-specific data, including progress, gamification elements, and personalized settings for the music learning application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "externalAuthId": {
+          "type": "string",
+          "description": "Reference to the unique identifier from the external authentication system (e.g., Firebase Authentication UID). This links the user's profile data to their authenticated identity."
+        },
+        "currentLevel": {
+          "type": "number",
+          "description": "The current learning level achieved by the user, influencing available content and difficulty."
+        },
+        "totalPoints": {
+          "type": "number",
+          "description": "The total points accumulated by the user across all activities, contributing to gamification and level progression."
+        },
+        "lastActivityAt": {
+          "type": "string",
+          "description": "Timestamp of the user's last recorded activity in the application.",
+          "format": "date-time"
+        },
+        "badgesEarnedIds": {
+          "type": "array",
+          "description": "References to Badge entities that the user has earned, showcasing their achievements. (Relationship: UserProfile N:N Badge)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preferredClef": {
+          "type": "string",
+          "description": "The user's preferred clef for practice sessions (treble, bass, or both).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "difficultySetting": {
+          "type": "string",
+          "description": "The user's preferred difficulty level for practice, defining the range and type of notes presented.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hintsEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether hints (e.g., highlighting middle C) are currently enabled for the user's practice sessions."
+        }
+      },
+      "required": [
+        "id",
+        "externalAuthId",
+        "currentLevel",
+        "totalPoints",
+        "lastActivityAt",
+        "badgesEarnedIds",
+        "preferredClef",
+        "difficultySetting",
+        "hintsEnabled"
+      ]
+    },
+    "Badge": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Badge",
+      "type": "object",
+      "description": "Represents an achievement or milestone a user can earn in the application, contributing to gamification.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Badge entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of the badge (e.g., 'Treble Clef Master')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the badge and what it represents to the user."
+        },
+        "iconUrl": {
+          "type": "string",
+          "description": "URL to the icon image representing the badge, used for visual display in the UI.",
+          "format": "uri"
+        },
+        "criteriaDescription": {
+          "type": "string",
+          "description": "A human-readable description of the conditions or criteria required for a user to earn this badge."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "iconUrl",
+        "criteriaDescription"
+      ]
+    },
+    "Note": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Note",
+      "type": "object",
+      "description": "A canonical representation of a musical note, including its characteristics on a staff and its pitch. This schema is also used for embedded note objects within other entities where an 'id' is not required.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for a canonical Note entity (e.g., 'treble-C4-natural'). This is required for standalone Note entities but not when the Note structure is embedded within another object for logging purposes."
+        },
+        "noteLetter": {
+          "type": "string",
+          "description": "The letter name of the note (e.g., 'C', 'D', 'E').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "octave": {
+          "type": "number",
+          "description": "The octave number of the note (e.g., 4 for Middle C)."
+        },
+        "accidental": {
+          "type": "string",
+          "description": "The accidental applied to the note (e.g., 'natural', 'sharp', 'flat'). This is crucial for correct validation and pitch.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "clef": {
+          "type": "string",
+          "description": "The clef in which the note is typically displayed or intended for (treble or bass).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "staffPositionIndex": {
+          "type": "number",
+          "description": "A numerical index representing the note's vertical position on a standard musical staff within its clef. This is useful for consistent rendering and comparison across different notes and clefs (e.g., 0 for the lowest note in a defined range, increasing upwards)."
+        },
+        "midiNumber": {
+          "type": "number",
+          "description": "The standard MIDI note number corresponding to the pitch of this note (e.g., 60 for Middle C). Essential for accurate audio playback."
+        }
+      },
+      "required": [
+        "id",
+        "noteLetter",
+        "octave",
+        "accidental",
+        "clef",
+        "staffPositionIndex",
+        "midiNumber"
+      ]
+    },
+    "Melody": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Melody",
+      "type": "object",
+      "description": "Represents a predefined simple melody for learning and practice within the application, such as well-known children's songs.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Melody entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The descriptive title of the melody (e.g., 'Twinkle Twinkle Little Star')."
+        },
+        "composer": {
+          "type": "string",
+          "description": "The composer or origin of the melody (e.g., 'Traditional', 'Public Domain')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description or context for the melody, helping users understand its nature."
+        },
+        "difficultyLevel": {
+          "type": "string",
+          "description": "The general difficulty level of the melody, assisting in appropriate selection for users.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "clefContext": {
+          "type": "string",
+          "description": "Indicates the primary clef(s) used in the melody (treble, bass, both, or mixed), guiding presentation.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "noteIds": {
+          "type": "array",
+          "description": "An ordered array of references to canonical Note entities that constitute the melody, defining the sequence to be played. (Relationship: Melody 1:N Note)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "difficultyLevel",
+        "clefContext",
+        "noteIds"
+      ]
+    },
+    "PracticeSession": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PracticeSession",
+      "type": "object",
+      "description": "Records the details and outcome of a user's single practice session across any learning mode, used for progress tracking and personalized feedback.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the PracticeSession entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile entity who undertook this practice session. (Relationship: UserProfile 1:N PracticeSession)"
+        },
+        "mode": {
+          "type": "string",
+          "description": "The specific learning mode used during this session.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Timestamp when the practice session began.",
+          "format": "date-time"
+        },
+        "endTime": {
+          "type": "string",
+          "description": "Timestamp when the practice session ended.",
+          "format": "date-time"
+        },
+        "durationSeconds": {
+          "type": "number",
+          "description": "The total duration of the practice session in seconds."
+        },
+        "totalItems": {
+          "type": "number",
+          "description": "The total number of questions, notes, or items presented/attempted in the session."
+        },
+        "correctCount": {
+          "type": "number",
+          "description": "The number of items correctly identified or played within the session."
+        },
+        "incorrectCount": {
+          "type": "number",
+          "description": "The number of items incorrectly identified or played within the session."
+        },
+        "accuracyPercentage": {
+          "type": "number",
+          "description": "The calculated accuracy of the session, expressed as a percentage."
+        },
+        "clefSetting": {
+          "type": "string",
+          "description": "The clef setting configured by the user for this specific practice session.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "difficultySetting": {
+          "type": "string",
+          "description": "The difficulty setting configured by the user for this specific practice session.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "melodyId": {
+          "type": "string",
+          "description": "Optional reference to the Melody entity if the 'PlayMelody' mode was used in this session. (Relationship: Melody 1:N PracticeSession)"
+        },
+        "notesPlayedLog": {
+          "type": "array",
+          "description": "A detailed log of each note presented and the user's response during the session, crucial for personalized feedback and AI generation.",
+          "items": {
+            "type": "boolean"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "mode",
+        "startTime",
+        "endTime",
+        "durationSeconds",
+        "totalItems",
+        "correctCount",
+        "incorrectCount",
+        "accuracyPercentage",
+        "clefSetting",
+        "difficultySetting",
+        "notesPlayedLog"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user-specific data including progress and settings. The 'userId' parameter corresponds directly to 'request.auth.uid', ensuring Authorization Independence via Path-Based ownership. Includes 'externalAuthId' for explicit linkage.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the authenticated user, matching Firebase Authentication UID."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/badges/{badgeId}",
+        "definition": {
+          "entityName": "Badge",
+          "schema": {
+            "$ref": "#/backend/entities/Badge"
+          },
+          "description": "Globally accessible, read-only collection of achievements. This collection has a homogeneous security posture (public read), supporting QAPs without specific authorization logic dependencies.",
+          "params": [
+            {
+              "name": "badgeId",
+              "description": "The unique identifier for a specific badge."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/notes/{noteId}",
+        "definition": {
+          "entityName": "Note",
+          "schema": {
+            "$ref": "#/backend/entities/Note"
+          },
+          "description": "Canonical, globally accessible, read-only collection of musical notes. Contains 'accidental', 'clef', 'staffPositionIndex', and 'midiNumber' for precise validation and playback logic. This collection supports QAPs as all notes are publicly readable.",
+          "params": [
+            {
+              "name": "noteId",
+              "description": "The unique identifier for a specific canonical note (e.g., 'treble-C4-sharp')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/melodies/{melodyId}",
+        "definition": {
+          "entityName": "Melody",
+          "schema": {
+            "$ref": "#/backend/entities/Melody"
+          },
+          "description": "Globally accessible, read-only collection of predefined melodies. 'noteIds' references canonical 'Note' entities. This collection supports QAPs as all melodies are publicly readable.",
+          "params": [
+            {
+              "name": "melodyId",
+              "description": "The unique identifier for a specific melody."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/practiceSessions/{sessionId}",
+        "definition": {
+          "entityName": "PracticeSession",
+          "schema": {
+            "$ref": "#/backend/entities/PracticeSession"
+          },
+          "description": "Records a single practice session for a user. 'userId' in the path matches 'request.auth.uid', enforcing Authorization Independence. Contains aggregate session data, and 'notesPlayedLog' (as per current schema) stores boolean correctness for each attempt. For detailed per-note logging (including accidentals), a schema modification for 'notesPlayedLog' or a separate subcollection would be ideal. QAPs are supported by path-based ownership for secure listing.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique ID of the user who owns this practice session, matching Firebase Authentication UID."
+            },
+            {
+              "name": "sessionId",
+              "description": "The unique identifier for a specific practice session."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The proposed Firestore structure prioritizes secure, scalable, and debuggable access control by adhering to the core design principles and strategy mandates. Authorization is achieved without reliance on get() calls in security rules. For user-specific data such as UserProfile and PracticeSession, authorization is path-based: users/{userId} and users/{userId}/practiceSessions/{sessionId}. The {userId} wildcard directly maps to request.auth.uid, making rules simple (allow read, write: if request.auth.uid == userId;). This eliminates the need to fetch parent documents to verify ownership, ensuring atomic operations and ease of debugging. For global public data, collections like /badges, /notes, and /melodies are designed with a homogeneous security posture: read-only for all authenticated users. This makes list operations on these collections inherently secure, as all documents are intended for public consumption. The Note entity schema already incorporates fields like noteLetter, octave, accidental, clef, staffPositionIndex, and midiNumber, which fully supports the application's goal of precise note validation, including accidentals (sharps), and accurate audio playback. The accidental field will explicitly store values like 'sharp', 'natural', 'flat', enabling strict comparison in both the frontend logic and potential backend validation. Regarding the PracticeSession entity, the provided schema defines notesPlayedLog as an array of booleans. While this tracks correctness, it doesn't store the detailed presentedNote and userResponse objects (including accidentals) as requested for 'personalized feedback and AI generation'. To fully meet this detailed logging requirement within Firestore, the PracticeSession schema for notesPlayedLog would ideally need to be updated to an array of objects, each containing an embedded Note for presentedNote and userResponse, along with isCorrect and timestamp. Alternatively, a subcollection users/{userId}/practiceSessions/{sessionId}/noteAttempts/{attemptId} could be created to store each detailed note interaction. Given the constraint to adhere strictly to the provided backend schema for firestorePaths, the notesPlayedLog will technically remain boolean in the PracticeSession document reference. The application's validation logic would primarily leverage the rich Note entity and perform the detailed logging client-side or consider a future schema evolution for server-side persistence of detailed interaction logs."
+  }
+}
