@@ -1,9 +1,10 @@
+
 /**
  * @fileOverview Core music logic for note validation, MIDI mapping, and staff positions.
  * Pure mathematical functions for consistency between A1 and G6.
  */
 
-import { KEYBOARD_RANGE, CZECH_OCTAVE_LABELS } from './music-constants';
+import { CZECH_OCTAVE_LABELS } from './music-constants';
 
 // ---------- CONSTANTS ----------
 
@@ -67,37 +68,45 @@ export function noteToTone(note: MusicalNote): string {
 }
 
 /**
- * Returns the Czech scientific name for the note based on the provided musical image.
- * Uses 'h' instead of 'B' and specific octave formats.
+ * Returns the Czech scientific name for the note.
+ * Uses 'H' instead of 'B' and specific octave formats:
+ * - Kontra: A1, H1
+ * - Velká: C, D, E...
+ * - Malá: c, d, e...
+ * - Jednočárkovaná: c1, d1...
+ * - Dvoučárkovaná: c2, d2...
+ * - Tříčárkovaná: c3, d3...
  */
 export function getCzechNoteName(note: MusicalNote): string {
   const isB = note.letter === 'B';
-  const letterChar = isB ? 'h' : note.letter;
-  const letterLower = letterChar.toLowerCase();
+  const letterChar = isB ? 'H' : note.letter;
   const accidental = note.accidental === 'sharp' ? 'is' : '';
-  const baseName = `${letterLower}${accidental}`;
+  
+  // Názvy tónů v malé a vyšších oktávách jsou malým písmem
+  const baseName = note.octave >= 3 ? letterChar.toLowerCase() : letterChar;
+  const fullBaseName = `${baseName}${accidental}`;
 
   switch (note.octave) {
     case 1: 
       // Kontra: A1, H1
-      return `${(isB ? 'H' : note.letter)}${accidental}1`;
+      return `${fullBaseName}1`;
     case 2: 
       // Velká: C, D, E...
-      return `${(isB ? 'H' : note.letter)}${accidental}`;
+      return fullBaseName;
     case 3: 
       // Malá: c, d, e...
-      return baseName;
+      return fullBaseName;
     case 4: 
       // Jednočárkovaná: c1, d1...
-      return `${baseName}1`;
+      return `${fullBaseName}1`;
     case 5: 
       // Dvoučárkovaná: c2, d2...
-      return `${baseName}2`;
+      return `${fullBaseName}2`;
     case 6: 
       // Tříčárkovaná: c3, d3...
-      return `${baseName}3`;
+      return `${fullBaseName}3`;
     default: 
-      return `${baseName}${note.octave}`;
+      return `${fullBaseName}${note.octave}`;
   }
 }
 

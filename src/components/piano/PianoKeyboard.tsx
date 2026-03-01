@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useMemo } from 'react';
-import { PIANO_KEYS, OCTAVES, KEYBOARD_RANGE } from '@/lib/music-constants';
+import { KEYBOARD_RANGE } from '@/lib/music-constants';
 import { cn } from '@/lib/utils';
-import { noteToMidi, midiToNote, getCzechNoteName } from '@/lib/music-logic';
+import { midiToNote, getCzechNoteName } from '@/lib/music-logic';
 
 interface PianoKeyboardProps {
   activeNotes?: string[];
@@ -32,7 +33,8 @@ export function PianoKeyboard({
         midi,
         type: isBlack ? 'black' : 'white',
         label: czechLabel,
-        isMiddleC: midi === 60
+        isMiddleC: midi === 60,
+        isC: note.letter === 'C' && note.accidental === 'natural'
       });
     }
     return keys;
@@ -62,10 +64,15 @@ export function PianoKeyboard({
               {!isBlack && (
                 <span className={cn(
                   "absolute bottom-1 md:bottom-2 left-0 right-0 text-[10px] md:text-[12px] font-black transition-opacity",
-                  (key.isMiddleC || isActive) ? "opacity-100 text-primary" : "text-muted-foreground/40 hover:opacity-100"
+                  (key.isC || key.isMiddleC || isActive) 
+                    ? "opacity-100 text-primary scale-110" 
+                    : "text-muted-foreground/30 hover:opacity-100"
                 )}>
                   {key.label}
                 </span>
+              )}
+              {key.isC && !isBlack && (
+                 <div className="absolute top-1 md:top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/40" />
               )}
               {key.isMiddleC && highlightMiddleC && !isBlack && (
                  <div className="absolute top-1 md:top-2 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary" />
