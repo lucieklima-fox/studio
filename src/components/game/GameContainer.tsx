@@ -160,11 +160,10 @@ export default function GameContainer() {
     if (status || mode === 'study') return;
     playNote(noteId);
     if (currentNote) {
-      const correctMidi = noteToMidi(currentNote);
       const pianoNotes = musicSystemConfig.keyboardMidis;
       const match = pianoNotes.find(m => noteToTone(midiToNote(m)) === noteId);
       
-      const correct = match === correctMidi;
+      const correct = match === noteToMidi(currentNote);
       setAttempts(a => a + 1);
       if (correct) {
         setScore(s => s + 10);
