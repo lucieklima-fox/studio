@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { PIANO_KEYS, OCTAVES } from '@/lib/music-constants';
+import { PIANO_KEYS, OCTAVES, KEYBOARD_RANGE } from '@/lib/music-constants';
 import { cn } from '@/lib/utils';
-import { noteToMidi } from '@/lib/music-logic';
+import { noteToMidi, midiToNote, getCzechNoteName } from '@/lib/music-logic';
 
 interface PianoKeyboardProps {
   activeNotes?: string[];
@@ -19,36 +19,35 @@ export function PianoKeyboard({
   className 
 }: PianoKeyboardProps) {
   const allKeys = useMemo(() => {
-    return OCTAVES.flatMap(octave => 
-      PIANO_KEYS.map(key => {
-        const id = `${key.name}${octave}`;
-        const midi = noteToMidi({
-          letter: key.name.replace('#', '') as any,
-          octave: octave,
-          accidental: key.name.includes('#') ? 'sharp' : 'natural',
-          clef: 'treble'
-        });
-        return {
-          ...key,
-          octave,
-          id,
-          midi
-        };
-      })
-    ).filter(key => key.midi >= 36 && key.midi <= 84);
+    const keys = [];
+    // Rozsah A1 (33) až G6 (91)
+    for (let midi = KEYBOARD_RANGE.minMidi; midi <= KEYBOARD_RANGE.maxMidi; midi++) {
+      const note = midiToNote(midi);
+      const isBlack = note.accidental === 'sharp';
+      const id = `${note.letter}${note.accidental === 'sharp' ? '#' : ''}${note.octave}`;
+      const czechLabel = getCzechNoteName(note);
+      
+      keys.push({
+        id,
+        midi,
+        type: isBlack ? 'black' : 'white',
+        label: czechLabel,
+        isMiddleC: midi === 60
+      });
+    }
+    return keys;
   }, []);
 
   return (
-    <div className={cn("relative flex h-36 md:h-48 w-full max-w-4xl mx-auto overflow-x-auto pb-2 md:pb-4 px-2 no-scrollbar scroll-smooth", className)}>
+    <div className={cn("relative flex h-36 md:h-48 w-full max-w-5xl mx-auto overflow-x-auto pb-2 md:pb-4 px-2 no-scrollbar scroll-smooth", className)}>
       <div className="flex min-w-max">
         {allKeys.map((key) => {
           const isBlack = key.type === 'black';
           const isActive = activeNotes.includes(key.id);
-          const isMiddleC = key.id === 'C4';
 
           return (
             <button
-              key={key.id}
+              key={`${key.id}-${key.midi}`}
               onClick={() => onNoteClick?.(key.id)}
               className={cn(
                 "relative flex-shrink-0 transition-all focus:outline-none touch-manipulation",
@@ -56,20 +55,20 @@ export function PianoKeyboard({
                   ? "piano-key-black w-6 md:w-8 h-20 md:h-28 -mx-3 md:-mx-4 z-10" 
                   : "piano-key-white w-10 md:w-12 h-32 md:h-44 z-0",
                 isActive && "active",
-                !isBlack && isMiddleC && highlightMiddleC && "border-b-2 md:border-b-4 border-b-primary"
+                !isBlack && key.isMiddleC && highlightMiddleC && "border-b-4 border-b-primary"
               )}
-              aria-label={`Key ${key.id}`}
+              aria-label={`Klávesa ${key.label}`}
             >
               {!isBlack && (
                 <span className={cn(
-                  "absolute bottom-1 md:bottom-2 left-0 right-0 text-[8px] md:text-[10px] font-bold text-muted-foreground transition-opacity",
-                  isMiddleC && highlightMiddleC ? "opacity-100 text-primary" : "opacity-0 hover:opacity-100"
+                  "absolute bottom-1 md:bottom-2 left-0 right-0 text-[10px] md:text-[12px] font-black transition-opacity",
+                  (key.isMiddleC || isActive) ? "opacity-100 text-primary" : "text-muted-foreground/40 hover:opacity-100"
                 )}>
-                  {key.id}
+                  {key.label}
                 </span>
               )}
-              {isMiddleC && highlightMiddleC && !isBlack && (
-                 <div className="absolute top-1 md:top-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-primary" />
+              {key.isMiddleC && highlightMiddleC && !isBlack && (
+                 <div className="absolute top-1 md:top-2 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary" />
               )}
             </button>
           );

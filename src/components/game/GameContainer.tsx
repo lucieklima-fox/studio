@@ -161,8 +161,8 @@ export default function GameContainer() {
     if (status || mode === 'study') return;
     playNote(noteId);
     if (currentNote) {
-      const pianoNotes = musicSystemConfig.keyboardMidis;
-      const match = pianoNotes.find(m => noteToTone(midiToNote(m)) === noteId);
+      // noteId format is "C4", "C#4", etc.
+      const match = musicSystemConfig.keyboardMidis.find(m => noteToTone(midiToNote(m)) === noteId);
       
       const correct = match === noteToMidi(currentNote);
       setAttempts(a => a + 1);
@@ -309,8 +309,8 @@ export default function GameContainer() {
           {mode === 'study' && (
             <Card className="rounded-3xl md:rounded-[3rem] border-none shadow-xl md:shadow-2xl bg-white p-6 md:p-10 space-y-6 md:space-y-10">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">Všechny Oktávy (A1 - G6)</h2>
-                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej české názvy tónů a jejich polohu podle obrázku.</p>
+                <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">Knihovna Tónů (A1 - g3)</h2>
+                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej české názvy tónů a jejich polohu v notové osnově.</p>
               </div>
               
               <div className="bg-muted/30 p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[200px] md:min-h-[340px]">
@@ -328,7 +328,7 @@ export default function GameContainer() {
                   <div className="flex-1 space-y-2 md:space-y-4">
                     <div className="flex justify-between font-bold text-[10px] md:text-sm px-2 text-muted-foreground uppercase tracking-widest">
                        <span>A1 (Kontra)</span>
-                       <span>G6 (Tříčárkovaná)</span>
+                       <span>g3 (Tříčárkovaná)</span>
                     </div>
                     <input 
                       type="range" 
@@ -476,7 +476,7 @@ export default function GameContainer() {
       <AlertDialog open={showResults} onOpenChange={setShowResults}>
         <AlertDialogContent className="rounded-3xl p-6 md:p-8 max-w-[90vw] md:max-w-md">
           <AlertDialogHeader className="items-center text-center space-y-4">
-            <Trophy className="w-12 h-12 md:w-12 md:h-12 lg:w-16 lg:h-16 text-green-500" />
+            <Trophy className="w-12 h-12 md:w-16 md:h-16 text-green-500" />
             <AlertDialogTitle className="text-xl md:text-3xl font-black">Test dokončen!</AlertDialogTitle>
             <AlertDialogDescription className="text-lg md:text-xl text-center">
               Skóre: <span className="font-bold">{testCorrectCount}</span> z 50.
