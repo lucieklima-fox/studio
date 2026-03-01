@@ -161,7 +161,6 @@ export default function GameContainer() {
     if (status || mode === 'study') return;
     playNote(noteId);
     if (currentNote) {
-      // noteId format is "C4", "C#4", etc.
       const match = musicSystemConfig.keyboardMidis.find(m => noteToTone(midiToNote(m)) === noteId);
       
       const correct = match === noteToMidi(currentNote);
