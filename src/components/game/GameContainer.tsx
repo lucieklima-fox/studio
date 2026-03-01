@@ -16,10 +16,11 @@ import {
   Accidental,
   midiToNote,
   noteToMidi,
-  generateRandomNote
+  generateRandomNote,
+  getCzechNoteName
 } from '@/lib/music-logic';
 import { musicSystemConfig } from '@/lib/music-system';
-import { Music, Keyboard, GraduationCap, RotateCcw, Trophy, PlayCircle, Volume2, Sparkles, LayoutDashboard, BrainCircuit, Loader2, BookOpen, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Music, Keyboard, GraduationCap, RotateCcw, Trophy, Volume2, BrainCircuit, Loader2, BookOpen, ChevronRight, ChevronLeft, LayoutDashboard } from 'lucide-react';
 import { useAuth, useFirestore, useCollection } from '@/firebase';
 import { collection, doc, query, orderBy, limit } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
@@ -112,8 +113,8 @@ export default function GameContainer() {
     }
 
     const pool = musicSystemConfig.allowedStaffMidis.filter(midi => {
-      if (clef === 'treble') return midi >= 60; 
-      return midi < 60; 
+      if (clef === 'treble') return midi >= 48; 
+      return midi < 60;
     });
 
     const newNote = generateRandomNote(clef, pool);
@@ -150,7 +151,8 @@ export default function GameContainer() {
         octave: currentNote.octave,
         accidental: currentNote.accidental,
         clef: currentNote.clef,
-        midi: noteToMidi(currentNote)
+        midi: noteToMidi(currentNote),
+        czechName: getCzechNoteName(currentNote)
       }
     }, { merge: true });
   }, [user, db, currentNote, mode, clef, isTestActive]);
@@ -208,7 +210,7 @@ export default function GameContainer() {
           <div>
             <h1 className="text-xl md:text-3xl font-bold text-foreground tracking-tight">Melody Maestro</h1>
             <p className="text-xs md:text-sm text-muted-foreground font-medium flex items-center gap-2">
-               Mód: <span className="text-primary capitalize">{mode}</span>
+               Mód: <span className="text-primary capitalize">{mode === 'study' ? 'Studium' : mode === 'identify' ? 'Poznávání' : mode === 'find' ? 'Klavír' : 'Výzva'}</span>
             </p>
           </div>
         </div>
@@ -258,7 +260,6 @@ export default function GameContainer() {
         </div>
       </div>
 
-      {/* Mode Tabs */}
       <Tabs value={mode} onValueChange={(v) => { if (isTestActive) return; setMode(v as GameMode); }} className="w-full">
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-4 md:mb-8">
           <TabsList className="flex h-auto p-1 md:p-2 bg-white rounded-2xl md:rounded-3xl border-2 border-primary/10 gap-1 md:gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar">
@@ -288,7 +289,7 @@ export default function GameContainer() {
                 generatePersonalizedPracticeSession({
                   challengingNotes: [...new Set(challengingNotes)],
                   challengingClefs: [...new Set(challengingClefs)],
-                  recentPerformanceSummary: "Uživatel procvičuje houslový i basový klíč v rozsahu C2-C6."
+                  recentPerformanceSummary: "Uživatel procvičuje český hudební systém v rozsahu A1-G6."
                 }).then(setAiLesson).finally(() => setIsGeneratingLesson(false));
               }
             }}
@@ -308,8 +309,8 @@ export default function GameContainer() {
           {mode === 'study' && (
             <Card className="rounded-3xl md:rounded-[3rem] border-none shadow-xl md:shadow-2xl bg-white p-6 md:p-10 space-y-6 md:space-y-10">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">Interaktivní Stupnice</h2>
-                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej tóny od C2 do C6.</p>
+                <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">Všechny Oktávy (A1 - G6)</h2>
+                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej české názvy tónů a jejich polohu podle obrázku.</p>
               </div>
               
               <div className="bg-muted/30 p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[200px] md:min-h-[340px]">
@@ -318,29 +319,36 @@ export default function GameContainer() {
 
               <div className="space-y-6 md:space-y-8 max-w-3xl mx-auto">
                 <div className="flex justify-between items-center gap-2 md:gap-4">
-                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => setStudyMidi(m => Math.max(36, m - 1))}>
+                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => {
+                    const next = Math.max(33, studyMidi - 1);
+                    setStudyMidi(next);
+                  }}>
                     <ChevronLeft size={20} />
                   </Button>
                   <div className="flex-1 space-y-2 md:space-y-4">
                     <div className="flex justify-between font-bold text-[10px] md:text-sm px-2 text-muted-foreground uppercase tracking-widest">
-                       <span>C2</span>
-                       <span>C6</span>
+                       <span>A1 (Kontra)</span>
+                       <span>G6 (Tříčárkovaná)</span>
                     </div>
                     <input 
                       type="range" 
-                      min="36" 
-                      max="84" 
+                      min="33" 
+                      max="91" 
                       value={studyMidi} 
                       onChange={(e) => {
                         const m = parseInt(e.target.value);
                         setStudyMidi(m);
-                        setClef(m < 60 ? 'bass' : 'treble');
+                        if (m < 53) setClef('bass');
+                        else if (m > 60) setClef('treble');
                         playNote(noteToTone(midiToNote(m)));
                       }}
                       className="w-full h-3 md:h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
                     />
                   </div>
-                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => setStudyMidi(m => Math.min(84, m + 1))}>
+                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => {
+                    const next = Math.min(91, studyMidi + 1);
+                    setStudyMidi(next);
+                  }}>
                     <ChevronRight size={20} />
                   </Button>
                 </div>
@@ -394,7 +402,7 @@ export default function GameContainer() {
                           variant="secondary"
                           disabled={status !== null}
                         >
-                          {letter}{selectedAccidental === 'sharp' ? '♯' : ''}
+                          {letter === 'B' ? 'H' : letter}{selectedAccidental === 'sharp' ? '♯' : ''}
                         </Button>
                       ))}
                     </div>
@@ -406,12 +414,16 @@ export default function GameContainer() {
 
           <TabsContent value="find" className="mt-0">
             <Card className="rounded-3xl md:rounded-[2.5rem] border-none shadow-xl bg-white p-6 md:p-8 text-center space-y-6 md:space-y-8">
-               <h2 className="text-xl md:text-2xl font-bold">Najdi tuto klávesu:</h2>
+               <h2 className="text-xl md:text-2xl font-bold">Najdi tón na klavíru:</h2>
                 <div className="py-8 md:py-12 bg-primary/5 rounded-2xl md:rounded-[2rem] border-4 border-dashed border-primary/20">
                     <span className="text-6xl md:text-8xl font-black text-primary">
-                      {currentNote?.letter}{currentNote?.accidental === 'sharp' ? '♯' : ''}
-                      <span className="text-2xl md:text-4xl text-primary/60 ml-1 md:ml-2">{currentNote?.octave}</span>
+                      {currentNote && getCzechNoteName(currentNote)}
                     </span>
+                    {currentNote && (
+                      <div className="mt-4 text-primary/60 font-bold uppercase tracking-widest">
+                        {musicSystemConfig.czechOctaveLabels[currentNote.octave]} oktáva
+                      </div>
+                    )}
                 </div>
             </Card>
           </TabsContent>
@@ -422,8 +434,8 @@ export default function GameContainer() {
                 <div className="w-16 h-16 md:w-24 md:h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto">
                     <Trophy className="w-8 h-8 md:w-12 md:h-12" />
                 </div>
-                <h2 className="text-2xl md:text-4xl font-black">Mistrovství 50 Not</h2>
-                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C6.</p>
+                <h2 className="text-2xl md:text-4xl font-black">Mistrovství Oktáv</h2>
+                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od A1 do G6. Zvládneš to?</p>
                 <Button onClick={() => { setIsTestActive(true); setTestIndex(0); setTestCorrectCount(0); }} size="lg" className="w-full sm:w-auto rounded-xl md:rounded-2xl h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl font-bold shadow-xl">
                   Spustit Test
                 </Button>
@@ -433,12 +445,10 @@ export default function GameContainer() {
         </div>
       </Tabs>
 
-      {/* Piano - Responsive with horizontal scroll */}
       <div className="bg-white p-4 md:p-8 rounded-3xl md:rounded-[3rem] shadow-2xl border-t-4 md:border-t-8 border-primary overflow-x-auto no-scrollbar">
           <PianoKeyboard activeNotes={activeNotes} onNoteClick={handleNoteClick} />
       </div>
 
-      {/* AI Lesson Dialog */}
       <AlertDialog open={!!aiLesson} onOpenChange={() => setAiLesson(null)}>
         <AlertDialogContent className="rounded-3xl p-6 md:p-8 max-w-[90vw] md:max-w-md">
           <AlertDialogHeader className="items-center text-center space-y-4">
@@ -463,11 +473,10 @@ export default function GameContainer() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Results Dialog */}
       <AlertDialog open={showResults} onOpenChange={setShowResults}>
         <AlertDialogContent className="rounded-3xl p-6 md:p-8 max-w-[90vw] md:max-w-md">
           <AlertDialogHeader className="items-center text-center space-y-4">
-            <Trophy className="w-12 h-12 md:w-16 md:h-16 text-green-500" />
+            <Trophy className="w-12 h-12 md:w-12 md:h-12 lg:w-16 lg:h-16 text-green-500" />
             <AlertDialogTitle className="text-xl md:text-3xl font-black">Test dokončen!</AlertDialogTitle>
             <AlertDialogDescription className="text-lg md:text-xl text-center">
               Skóre: <span className="font-bold">{testCorrectCount}</span> z 50.

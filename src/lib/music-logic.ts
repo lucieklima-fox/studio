@@ -1,9 +1,9 @@
 /**
  * @fileOverview Core music logic for note validation, MIDI mapping, and staff positions.
- * Pure mathematical functions for consistency between C2 and C5.
+ * Pure mathematical functions for consistency between A1 and G6.
  */
 
-import { KEYBOARD_RANGE } from './music-constants';
+import { KEYBOARD_RANGE, CZECH_OCTAVE_LABELS } from './music-constants';
 
 // ---------- CONSTANTS ----------
 
@@ -15,13 +15,8 @@ const baseOffsetMap: Record<string, number> = {
   C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11
 };
 
-/**
- * Reference points for staff positioning (Diatonic indices)
- * Treble Clef Bottom Line (E4) = (4 * 7) + 2 = 30
- * Bass Clef Bottom Line (G2) = (2 * 7) + 4 = 18
- */
-const TREBLE_ANCHOR = 30; // E4
-const BASS_ANCHOR = 18;   // G2
+const TREBLE_ANCHOR = 30; // E4 (Diatonic index: 4*7 + 2)
+const BASS_ANCHOR = 18;   // G2 (Diatonic index: 2*7 + 4)
 
 // ---------- TYPES ----------
 
@@ -38,10 +33,6 @@ export type MusicalNote = {
 
 // ---------- CORE UTILITIES ----------
 
-/**
- * Returns a MusicalNote object from a MIDI number.
- * Accidentals are resolved to sharps.
- */
 export function midiToNote(midi: number, clef: Clef = "treble"): MusicalNote {
   const octave = Math.floor(midi / 12) - 1;
   const semitone = midi % 12;
@@ -64,27 +55,56 @@ export function midiToNote(midi: number, clef: Clef = "treble"): MusicalNote {
   return { letter, octave, accidental, clef };
 }
 
-/**
- * Returns the deterministic MIDI number for a given note.
- */
 export function noteToMidi(note: MusicalNote): number {
   const base = baseOffsetMap[note.letter];
   const accidentalOffset = note.accidental === "sharp" ? 1 : 0;
   return 12 * (note.octave + 1) + base + accidentalOffset;
 }
 
-/**
- * Returns the Tone.js compatible note string (e.g., "C#4" or "C4").
- */
 export function noteToTone(note: MusicalNote): string {
   const accidentalChar = note.accidental === "sharp" ? "#" : "";
   return `${note.letter}${accidentalChar}${note.octave}`;
 }
 
 /**
- * Calculates the diatonic staff index (line/space steps).
- * 0 = Bottom Line of the clef (E4 for treble, G2 for bass).
+ * Returns the Czech scientific name for the note based on the provided musical image.
+ * Uses 'h' instead of 'B' and specific octave formats.
  */
+export function getCzechNoteName(note: MusicalNote): string {
+  const isB = note.letter === 'B';
+  const letterChar = isB ? 'h' : note.letter;
+  const letterLower = letterChar.toLowerCase();
+  const accidental = note.accidental === 'sharp' ? 'is' : '';
+  const baseName = `${letterLower}${accidental}`;
+
+  switch (note.octave) {
+    case 1: 
+      // Kontra: A1, H1
+      return `${(isB ? 'H' : note.letter)}${accidental}1`;
+    case 2: 
+      // Velká: C, D, E...
+      return `${(isB ? 'H' : note.letter)}${accidental}`;
+    case 3: 
+      // Malá: c, d, e...
+      return baseName;
+    case 4: 
+      // Jednočárkovaná: c1, d1...
+      return `${baseName}1`;
+    case 5: 
+      // Dvoučárkovaná: c2, d2...
+      return `${baseName}2`;
+    case 6: 
+      // Tříčárkovaná: c3, d3...
+      return `${baseName}3`;
+    default: 
+      return `${baseName}${note.octave}`;
+  }
+}
+
+export function getCzechOctaveLabel(octave: number): string {
+  return (CZECH_OCTAVE_LABELS as any)[octave] || `Oktáva ${octave}`;
+}
+
 export function midiToStaffIndex(midi: number, clef: Clef): number {
   const note = midiToNote(midi, clef);
   const diatonicIndex = note.octave * 7 + letterIndexMap[note.letter];
@@ -94,9 +114,6 @@ export function midiToStaffIndex(midi: number, clef: Clef): number {
     : diatonicIndex - BASS_ANCHOR;
 }
 
-/**
- * Generates relative staff indices for ledger lines.
- */
 export function getLedgerLines(staffIndex: number): number[] {
   const lines: number[] = [];
   if (staffIndex < 0) {
@@ -122,7 +139,7 @@ export function isCorrectAnswer(generated: MusicalNote, userAnswer: Partial<Musi
 }
 
 export function generateRandomNote(clef: Clef, allowedMidis: number[]): MusicalNote {
-  if (allowedMidis.length === 0) return midiToNote(60, clef); // Default to Middle C if pool error
+  if (allowedMidis.length === 0) return midiToNote(60, clef);
   const randomIndex = Math.floor(Math.random() * allowedMidis.length);
   return midiToNote(allowedMidis[randomIndex], clef);
 }

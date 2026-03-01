@@ -1,6 +1,6 @@
 /**
  * @fileOverview Core music constants for the Melody Maestro application.
- * Focused strictly on the educational range C2 to C6.
+ * Focused on the range A1 (Kontra) to G6 (Tříčárkovaná) based on Czech standards.
  */
 
 export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -21,9 +21,18 @@ export const PIANO_KEYS = [
   { name: 'B', type: 'white' },
 ] as const;
 
-export const OCTAVES = [2, 3, 4, 5, 6] as const;
+export const OCTAVES = [1, 2, 3, 4, 5, 6] as const;
 
 export const KEYBOARD_RANGE = {
-  minMidi: 36, // C2
-  maxMidi: 84  // C6
+  minMidi: 33, // A1 (Kontra A)
+  maxMidi: 91  // G6 (Tříčárkované G)
+};
+
+export const CZECH_OCTAVE_LABELS = {
+  1: "Kontra",
+  2: "Velká",
+  3: "Malá",
+  4: "Jednočárkovaná",
+  5: "Dvoučárkovaná",
+  6: "Tříčárkovaná"
 };
