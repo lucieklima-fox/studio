@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Core music logic for note validation, MIDI mapping, and staff positions.
  * Pure mathematical functions for consistency between A1 and G6.
@@ -12,7 +11,7 @@ const letterIndexMap: Record<string, number> = {
   C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6
 };
 
-// Mapování půltónů v rámci oktávy (0-11)
+// Mapování půltónů v rámci oktávy (0-11) pro standardní piano
 const semitoneMap: { letter: NoteLetter, accidental: Accidental }[] = [
   { letter: 'C', accidental: 'natural' }, // 0
   { letter: 'C', accidental: 'sharp' },   // 1
@@ -67,13 +66,7 @@ export function noteToTone(note: MusicalNote): string {
 
 /**
  * Returns the Czech scientific name for the note.
- * Uses 'H' instead of 'B' and specific octave formats:
- * - Kontra: A1, H1
- * - Velká: C, D, E...
- * - Malá: c, d, e...
- * - Jednočárkovaná: c1, d1...
- * - Dvoučárkovaná: c2, d2...
- * - Tříčárkovaná: c3, d3...
+ * Uses 'H' instead of 'B' and specific octave formats.
  */
 export function getCzechNoteName(note: MusicalNote): string {
   const isB = note.letter === 'B';

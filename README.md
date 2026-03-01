@@ -1,4 +1,3 @@
-
 # Melody Maestro - Hudební výchova hrou
 
 Tato aplikace je vyvíjena v prostředí Next.js 15 s využitím Firebase (pro databázi a autentizaci) a Genkit (pro AI kouče).

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -289,7 +288,7 @@ export default function GameContainer() {
                 generatePersonalizedPracticeSession({
                   challengingNotes: [...new Set(challengingNotes)],
                   challengingClefs: [...new Set(challengingClefs)],
-                  recentPerformanceSummary: "Uživatel procvičuje český hudební systém v rozsahu A1-G6."
+                  recentPerformanceSummary: "Uživatel procvičuje český hudební systém v rozsahu A1-g3."
                 }).then(setAiLesson).finally(() => setIsGeneratingLesson(false));
               }
             }}
@@ -435,7 +434,7 @@ export default function GameContainer() {
                     <Trophy className="w-8 h-8 md:w-12 md:h-12" />
                 </div>
                 <h2 className="text-2xl md:text-4xl font-black">Mistrovství Oktáv</h2>
-                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od A1 do G6. Zvládneš to?</p>
+                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od A1 do g3. Zvládneš to?</p>
                 <Button onClick={() => { setIsTestActive(true); setTestIndex(0); setTestCorrectCount(0); }} size="lg" className="w-full sm:w-auto rounded-xl md:rounded-2xl h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl font-bold shadow-xl">
                   Spustit Test
                 </Button>
