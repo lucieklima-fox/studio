@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
@@ -475,7 +476,9 @@ export default function GameContainer() {
       <AlertDialog open={showResults} onOpenChange={setShowResults}>
         <AlertDialogContent className="rounded-3xl p-6 md:p-8 max-w-[90vw] md:max-w-md">
           <AlertDialogHeader className="items-center text-center space-y-4">
-            <Trophy className="w-12 h-12 md:w-16 md:h-16 text-green-500" />
+            <div className="flex items-center justify-center text-green-500">
+               <Trophy className="w-12 h-12 md:w-16 md:h-16" />
+            </div>
             <AlertDialogTitle className="text-xl md:text-3xl font-black">Test dokončen!</AlertDialogTitle>
             <AlertDialogDescription className="text-lg md:text-xl text-center">
               Skóre: <span className="font-bold">{testCorrectCount}</span> z 50.

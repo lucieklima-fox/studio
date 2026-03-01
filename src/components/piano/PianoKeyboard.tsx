@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useMemo } from 'react';
@@ -56,6 +57,7 @@ export function PianoKeyboard({
                   ? "bg-neutral-900 w-7 md:w-9 h-28 md:h-36 -mx-3.5 md:-mx-4.5 z-10 rounded-b shadow-[inset_0_-2px_4px_rgba(255,255,255,0.2),0_4px_6px_rgba(0,0,0,0.5)] active:brightness-125" 
                   : "bg-white w-11 md:w-14 h-40 md:h-52 z-0 border border-gray-300 rounded-b-lg shadow-[inset_0_-4px_8px_rgba(0,0,0,0.05),0_2px_4px_rgba(0,0,0,0.1)] active:bg-gray-50 active:pt-1",
                 isActive && (isBlack ? "bg-accent shadow-inner scale-95" : "bg-primary/20 border-primary shadow-inner"),
+                !isBlack && key.isC && "border-b-4 border-b-primary/40",
                 !isBlack && key.isMiddleC && highlightMiddleC && "border-b-8 border-b-primary"
               )}
               aria-label={`Klávesa ${key.label}`}
@@ -71,10 +73,10 @@ export function PianoKeyboard({
                 </span>
               )}
               {key.isC && !isBlack && (
-                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-primary/40 shadow-sm" />
-              )}
-              {key.isMiddleC && highlightMiddleC && !isBlack && (
-                 <div className="absolute top-3 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-primary shadow-md border-2 border-white" />
+                 <div className={cn(
+                   "absolute top-3 left-1/2 -translate-x-1/2 rounded-full shadow-sm",
+                   key.isMiddleC ? "w-4 h-4 bg-primary border-2 border-white shadow-md" : "w-2.5 h-2.5 bg-primary/40"
+                 )} />
               )}
             </button>
           );
