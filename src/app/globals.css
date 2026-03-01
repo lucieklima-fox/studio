@@ -51,3 +51,12 @@
 .piano-key-black.active {
   @apply bg-accent shadow-inner;
 }
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

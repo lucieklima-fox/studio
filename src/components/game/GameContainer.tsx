@@ -51,7 +51,6 @@ export default function GameContainer() {
   const { user, auth } = useAuth();
   const db = useFirestore();
 
-  // Core State
   const [mode, setMode] = useState<GameMode>('study');
   const [clef, setClef] = useState<'treble' | 'bass'>('treble');
   const [score, setScore] = useState(0);
@@ -59,21 +58,14 @@ export default function GameContainer() {
   const [currentNote, setCurrentNote] = useState<MusicalNote | null>(null);
   const [status, setStatus] = useState<'correct' | 'incorrect' | null>(null);
   const [selectedAccidental, setSelectedAccidental] = useState<Accidental>('natural');
-
-  // Study Mode State
-  const [studyMidi, setStudyMidi] = useState(60); // Start at Middle C
-
-  // Challenge Mode State
+  const [studyMidi, setStudyMidi] = useState(60); 
   const [isTestActive, setIsTestActive] = useState(false);
   const [testIndex, setTestIndex] = useState(0);
   const [testCorrectCount, setTestCorrectCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
-
-  // AI & Stats State
   const [isGeneratingLesson, setIsGeneratingLesson] = useState(false);
   const [aiLesson, setAiLesson] = useState<PersonalizedPracticeSessionGeneratorOutput | null>(null);
 
-  // Fetch recent sessions
   const sessionsQuery = useMemo(() => {
     if (!db || !user) return null;
     return query(
@@ -208,85 +200,87 @@ export default function GameContainer() {
   const activeNotes = (status === 'correct' || mode === 'study') && currentNote ? [noteToTone(currentNote)] : [];
 
   return (
-    <div className="container mx-auto max-w-5xl py-8 px-4 space-y-8">
+    <div className="container mx-auto max-w-5xl py-4 md:py-8 px-4 space-y-4 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-6 rounded-3xl shadow-sm border-2 border-primary/20">
-        <div className="flex items-center gap-4">
-          <div className="bg-primary p-3 rounded-2xl shadow-lg">
-            <Music className="text-white h-8 w-8" />
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 md:p-6 rounded-3xl shadow-sm border-2 border-primary/20">
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="bg-primary p-2 md:p-3 rounded-2xl shadow-lg">
+            <Music className="text-white h-6 w-6 md:h-8 md:w-8" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-foreground tracking-tight">Melody Maestro</h1>
-            <p className="text-muted-foreground font-medium flex items-center gap-2">
-               Mode: <span className="text-primary capitalize">{mode}</span>
+            <h1 className="text-xl md:text-3xl font-bold text-foreground tracking-tight">Melody Maestro</h1>
+            <p className="text-xs md:text-sm text-muted-foreground font-medium flex items-center gap-2">
+               Mód: <span className="text-primary capitalize">{mode}</span>
             </p>
           </div>
         </div>
 
-        <div className="flex gap-2 items-center">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-2">
-                   <LayoutDashboard className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[400px] sm:w-[540px] rounded-l-[3rem]">
-                <SheetHeader>
-                  <SheetTitle className="text-2xl font-bold">Your Progress</SheetTitle>
-                  <SheetDescription>Track your musical journey</SheetDescription>
-                </SheetHeader>
-                <div className="py-8 space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-primary/10 p-4 rounded-2xl text-center">
-                       <p className="text-xs font-bold uppercase text-primary">Lifetime Score</p>
-                       <p className="text-2xl font-black">{score}</p>
-                    </div>
-                    <div className="bg-accent/10 p-4 rounded-2xl text-center">
-                       <p className="text-xs font-bold uppercase text-accent">Recent Accuracy</p>
-                       <p className="text-2xl font-black">{accuracy}%</p>
+        <div className="flex gap-2 items-center w-full md:w-auto justify-between md:justify-end">
+            <div className="flex gap-2">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl border-2">
+                     <LayoutDashboard className="h-5 w-5 md:h-6 md:w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[85vw] sm:w-[540px] rounded-l-3xl">
+                  <SheetHeader>
+                    <SheetTitle className="text-2xl font-bold">Tvůj Pokrok</SheetTitle>
+                    <SheetDescription>Sleduj svou hudební cestu</SheetDescription>
+                  </SheetHeader>
+                  <div className="py-8 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-primary/10 p-4 rounded-2xl text-center">
+                         <p className="text-xs font-bold uppercase text-primary">Celkové skóre</p>
+                         <p className="text-2xl font-black">{score}</p>
+                      </div>
+                      <div className="bg-accent/10 p-4 rounded-2xl text-center">
+                         <p className="text-xs font-bold uppercase text-accent">Přesnost</p>
+                         <p className="text-2xl font-black">{accuracy}%</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
 
-            <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-14 w-14 rounded-2xl border-2"
-                onClick={() => {setScore(0); setAttempts(0); generateNextRound();}}
-            >
-                <RotateCcw className="h-6 w-6" />
-            </Button>
+              <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl border-2"
+                  onClick={() => {setScore(0); setAttempts(0); generateNextRound();}}
+              >
+                  <RotateCcw className="h-5 w-5 md:h-6 md:w-6" />
+              </Button>
+            </div>
 
-            <div className="text-center px-6 py-3 bg-primary/10 rounded-2xl hidden sm:block min-w-[120px]">
-                <p className="text-xs font-bold text-primary uppercase tracking-wider">Mastery</p>
-                <p className="text-3xl font-black text-primary">{accuracy}%</p>
+            <div className="text-center px-4 md:px-6 py-2 md:py-3 bg-primary/10 rounded-xl md:rounded-2xl min-w-[100px]">
+                <p className="text-[10px] md:text-xs font-bold text-primary uppercase tracking-wider">Mistrovství</p>
+                <p className="text-xl md:text-3xl font-black text-primary">{accuracy}%</p>
             </div>
         </div>
       </div>
 
       {/* Mode Tabs */}
       <Tabs value={mode} onValueChange={(v) => { if (isTestActive) return; setMode(v as GameMode); }} className="w-full">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-8 overflow-x-auto pb-2">
-          <TabsList className="flex h-auto p-2 bg-white rounded-3xl border-2 border-primary/10 gap-2 w-full lg:w-auto">
-            <TabsTrigger value="study" className="flex-1 py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 font-bold whitespace-nowrap">
-              <BookOpen size={18} /> Studium
+        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-4 md:mb-8">
+          <TabsList className="flex h-auto p-1 md:p-2 bg-white rounded-2xl md:rounded-3xl border-2 border-primary/10 gap-1 md:gap-2 w-full lg:w-auto overflow-x-auto no-scrollbar">
+            <TabsTrigger value="study" className="flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-1 md:gap-2 font-bold text-xs md:text-sm whitespace-nowrap">
+              <BookOpen size={16} /> Studium
             </TabsTrigger>
-            <TabsTrigger value="identify" className="flex-1 py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 font-bold whitespace-nowrap">
-              <GraduationCap size={18} /> Poznávání
+            <TabsTrigger value="identify" className="flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-1 md:gap-2 font-bold text-xs md:text-sm whitespace-nowrap">
+              <GraduationCap size={16} /> Poznávání
             </TabsTrigger>
-            <TabsTrigger value="find" className="flex-1 py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 font-bold whitespace-nowrap">
-              <Keyboard size={18} /> Klavír
+            <TabsTrigger value="find" className="flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-1 md:gap-2 font-bold text-xs md:text-sm whitespace-nowrap">
+              <Keyboard size={16} /> Klavír
             </TabsTrigger>
-            <TabsTrigger value="challenge" className="flex-1 py-4 rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-2 font-bold whitespace-nowrap">
-              <Trophy size={18} /> Výzva
+            <TabsTrigger value="challenge" className="flex-1 py-3 md:py-4 rounded-xl md:rounded-2xl data-[state=active]:bg-primary data-[state=active]:text-white gap-1 md:gap-2 font-bold text-xs md:text-sm whitespace-nowrap">
+              <Trophy size={16} /> Výzva
             </TabsTrigger>
           </TabsList>
 
           <Button 
             variant="secondary" 
-            className="h-16 px-8 rounded-3xl gap-3 font-bold shadow-lg border-2 border-primary/10"
+            className="h-12 md:h-16 px-6 md:px-8 rounded-2xl md:rounded-3xl gap-2 md:gap-3 font-bold shadow-lg border-2 border-primary/10 w-full lg:w-auto"
             onClick={() => {
               if (recentSessions) {
                 const struggles = recentSessions.filter(s => s.correctCount === 0);
@@ -296,41 +290,41 @@ export default function GameContainer() {
                 generatePersonalizedPracticeSession({
                   challengingNotes: [...new Set(challengingNotes)],
                   challengingClefs: [...new Set(challengingClefs)],
-                  recentPerformanceSummary: "User is studying Treble and Bass ranges."
+                  recentPerformanceSummary: "Uživatel procvičuje houslový i basový klíč v rozsahu C2-C5."
                 }).then(setAiLesson).finally(() => setIsGeneratingLesson(false));
               }
             }}
             disabled={isGeneratingLesson || (recentSessions?.length ?? 0) < 3}
           >
-            {isGeneratingLesson ? <Loader2 className="animate-spin" /> : <BrainCircuit className="text-primary" />}
+            {isGeneratingLesson ? <Loader2 className="animate-spin" /> : <BrainCircuit className="text-primary h-5 w-5" />}
             AI Kouč
           </Button>
         </div>
 
-        <div className="relative min-h-[500px]">
+        <div className="relative min-h-[300px] md:min-h-[500px]">
           <FeedbackOverlay 
             status={status} 
             onFinished={() => { if (!isTestActive) { setStatus(null); generateNextRound(); } }} 
           />
 
           {mode === 'study' && (
-            <Card className="rounded-[3rem] border-none shadow-2xl bg-white p-10 space-y-10">
-              <div className="text-center space-y-3">
-                <h2 className="text-4xl font-black text-primary tracking-tight">Interaktivní Stupnice</h2>
-                <p className="text-xl text-muted-foreground font-medium">Sledujte tóny od C2 do C5 a učte se jejich názvy.</p>
+            <Card className="rounded-3xl md:rounded-[3rem] border-none shadow-xl md:shadow-2xl bg-white p-6 md:p-10 space-y-6 md:space-y-10">
+              <div className="text-center space-y-2">
+                <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">Interaktivní Stupnice</h2>
+                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej tóny od C2 do C5.</p>
               </div>
               
-              <div className="bg-muted/30 p-10 rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[340px]">
+              <div className="bg-muted/30 p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[200px] md:min-h-[340px]">
                 {currentNote && <StaffRenderer clef={clef} note={currentNote} showName className="h-full border-none shadow-none bg-transparent" />}
               </div>
 
-              <div className="space-y-8 max-w-3xl mx-auto">
-                <div className="flex justify-between items-center gap-4">
-                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.max(36, m - 1))}>
-                    <ChevronLeft size={24} />
+              <div className="space-y-6 md:space-y-8 max-w-3xl mx-auto">
+                <div className="flex justify-between items-center gap-2 md:gap-4">
+                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => setStudyMidi(m => Math.max(36, m - 1))}>
+                    <ChevronLeft size={20} />
                   </Button>
-                  <div className="flex-1 space-y-4">
-                    <div className="flex justify-between font-bold text-sm px-2 text-muted-foreground uppercase tracking-widest">
+                  <div className="flex-1 space-y-2 md:space-y-4">
+                    <div className="flex justify-between font-bold text-[10px] md:text-sm px-2 text-muted-foreground uppercase tracking-widest">
                        <span>C2</span>
                        <span>C5</span>
                     </div>
@@ -345,60 +339,60 @@ export default function GameContainer() {
                         setClef(m < 60 ? 'bass' : 'treble');
                         playNote(noteToTone(midiToNote(m)));
                       }}
-                      className="w-full h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
+                      className="w-full h-3 md:h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
                     />
                   </div>
-                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full" onClick={() => setStudyMidi(m => Math.min(72, m + 1))}>
-                    <ChevronRight size={24} />
+                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => setStudyMidi(m => Math.min(72, m + 1))}>
+                    <ChevronRight size={20} />
                   </Button>
                 </div>
                 
-                <div className="flex justify-center gap-4">
-                   <Button variant={clef === 'treble' ? 'default' : 'outline'} onClick={() => setClef('treble')} className="h-12 px-8 rounded-2xl font-bold shadow-sm">Houslový klíč</Button>
-                   <Button variant={clef === 'bass' ? 'default' : 'outline'} onClick={() => setClef('bass')} className="h-12 px-8 rounded-2xl font-bold shadow-sm">Basový klíč</Button>
+                <div className="flex flex-col sm:flex-row justify-center gap-2 md:gap-4">
+                   <Button variant={clef === 'treble' ? 'default' : 'outline'} onClick={() => setClef('treble')} className="h-10 md:h-12 px-6 md:px-8 rounded-xl md:rounded-2xl font-bold shadow-sm text-xs md:text-base">Houslový klíč</Button>
+                   <Button variant={clef === 'bass' ? 'default' : 'outline'} onClick={() => setClef('bass')} className="h-10 md:h-12 px-6 md:px-8 rounded-xl md:rounded-2xl font-bold shadow-sm text-xs md:text-base">Basový klíč</Button>
                 </div>
               </div>
             </Card>
           )}
 
           {(mode === 'identify' || (mode === 'challenge' && isTestActive)) && (
-            <div className="space-y-6">
-              <Card className="rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
-                <CardContent className="p-8 space-y-8">
+            <div className="space-y-4 md:space-y-6">
+              <Card className="rounded-3xl md:rounded-[2.5rem] border-none shadow-xl bg-white overflow-hidden">
+                <CardContent className="p-4 md:p-8 space-y-4 md:space-y-8">
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                      <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <h2 className="text-lg md:text-2xl font-bold flex items-center gap-2 text-center">
                           {isTestActive ? `Nota ${testIndex + 1} z 50` : `Jak se jmenuje tato nota?`}
                       </h2>
                       
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 w-full sm:w-auto">
                         {currentNote && (
-                          <Button variant="outline" size="sm" className="rounded-xl font-bold gap-2" onClick={() => playNote(noteToTone(currentNote))}>
-                            <Volume2 size={16} /> Poslechnout
+                          <Button variant="outline" size="sm" className="flex-1 sm:flex-none rounded-xl font-bold gap-2 text-xs" onClick={() => playNote(noteToTone(currentNote))}>
+                            <Volume2 size={14} /> Poslechnout
                           </Button>
                         )}
                         {!isTestActive && (
-                          <div className="flex bg-muted p-1 rounded-xl">
-                              <Button variant={clef === 'treble' ? 'default' : 'ghost'} onClick={() => setClef('treble')} className="rounded-lg font-bold h-8 px-3 text-xs">Treble</Button>
-                              <Button variant={clef === 'bass' ? 'default' : 'ghost'} onClick={() => setClef('bass')} className="rounded-lg font-bold h-8 px-3 text-xs">Bass</Button>
+                          <div className="flex bg-muted p-1 rounded-xl flex-1 sm:flex-none">
+                              <Button variant={clef === 'treble' ? 'default' : 'ghost'} onClick={() => setClef('treble')} className="flex-1 rounded-lg font-bold h-8 px-3 text-[10px]">Treble</Button>
+                              <Button variant={clef === 'bass' ? 'default' : 'ghost'} onClick={() => setClef('bass')} className="flex-1 rounded-lg font-bold h-8 px-3 text-[10px]">Bass</Button>
                           </div>
                         )}
                       </div>
                   </div>
                   
-                  {currentNote && <StaffRenderer clef={currentNote.clef} note={currentNote} />}
+                  {currentNote && <StaffRenderer clef={currentNote.clef} note={currentNote} className="h-64 md:h-80" />}
 
-                  <div className="space-y-6">
-                    <div className="flex justify-center gap-3">
-                      <Button variant={selectedAccidental === 'natural' ? 'default' : 'outline'} onClick={() => setSelectedAccidental('natural')} className="rounded-xl px-6 font-bold">Natural ♮</Button>
-                      <Button variant={selectedAccidental === 'sharp' ? 'default' : 'outline'} onClick={() => setSelectedAccidental('sharp')} className="rounded-xl px-6 font-bold">Sharp ♯</Button>
+                  <div className="space-y-4 md:space-y-6">
+                    <div className="flex justify-center gap-2 md:gap-3">
+                      <Button variant={selectedAccidental === 'natural' ? 'default' : 'outline'} onClick={() => setSelectedAccidental('natural')} className="flex-1 sm:flex-none rounded-xl px-4 md:px-6 font-bold text-xs">♮ Natural</Button>
+                      <Button variant={selectedAccidental === 'sharp' ? 'default' : 'outline'} onClick={() => setSelectedAccidental('sharp')} className="flex-1 sm:flex-none rounded-xl px-4 md:px-6 font-bold text-xs">♯ Sharp</Button>
                     </div>
 
-                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+                    <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 md:gap-3">
                       {(['C', 'D', 'E', 'F', 'G', 'A', 'B'] as NoteLetter[]).map((letter) => (
                         <Button 
                           key={letter} 
                           onClick={() => handleNameClick(letter)}
-                          className="h-20 text-2xl font-black rounded-2xl transition-all shadow-md"
+                          className="h-14 md:h-20 text-lg md:text-2xl font-black rounded-xl md:rounded-2xl transition-all shadow-md"
                           variant="secondary"
                           disabled={status !== null}
                         >
@@ -413,12 +407,12 @@ export default function GameContainer() {
           )}
 
           <TabsContent value="find" className="mt-0">
-            <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-8 text-center space-y-8">
-               <h2 className="text-2xl font-bold">Najdi tuto klávesu:</h2>
-                <div className="py-12 bg-primary/5 rounded-[2rem] border-4 border-dashed border-primary/20">
-                    <span className="text-8xl font-black text-primary">
+            <Card className="rounded-3xl md:rounded-[2.5rem] border-none shadow-xl bg-white p-6 md:p-8 text-center space-y-6 md:space-y-8">
+               <h2 className="text-xl md:text-2xl font-bold">Najdi tuto klávesu:</h2>
+                <div className="py-8 md:py-12 bg-primary/5 rounded-2xl md:rounded-[2rem] border-4 border-dashed border-primary/20">
+                    <span className="text-6xl md:text-8xl font-black text-primary">
                       {currentNote?.letter}{currentNote?.accidental === 'sharp' ? '♯' : ''}
-                      <span className="text-4xl text-primary/60 ml-2">{currentNote?.octave}</span>
+                      <span className="text-2xl md:text-4xl text-primary/60 ml-1 md:ml-2">{currentNote?.octave}</span>
                     </span>
                 </div>
             </Card>
@@ -426,13 +420,13 @@ export default function GameContainer() {
 
           <TabsContent value="challenge" className="mt-0">
             {!isTestActive && (
-              <Card className="rounded-[2.5rem] border-none shadow-xl bg-white p-12 text-center space-y-8">
-                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto">
-                    <Trophy size={48} />
+              <Card className="rounded-3xl md:rounded-[2.5rem] border-none shadow-xl bg-white p-8 md:p-12 text-center space-y-6 md:space-y-8">
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto">
+                    <Trophy className="w-8 h-8 md:w-12 md:h-12" />
                 </div>
-                <h2 className="text-4xl font-black">Mistrovství 50 Not</h2>
-                <p className="text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C5.</p>
-                <Button onClick={() => { setIsTestActive(true); setTestIndex(0); setTestCorrectCount(0); }} size="lg" className="rounded-2xl h-20 px-12 text-2xl font-bold shadow-xl">
+                <h2 className="text-2xl md:text-4xl font-black">Mistrovství 50 Not</h2>
+                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C5.</p>
+                <Button onClick={() => { setIsTestActive(true); setTestIndex(0); setTestCorrectCount(0); }} size="lg" className="w-full sm:w-auto rounded-xl md:rounded-2xl h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl font-bold shadow-xl">
                   Spustit Test
                 </Button>
               </Card>
@@ -441,20 +435,20 @@ export default function GameContainer() {
         </div>
       </Tabs>
 
-      {/* Piano */}
-      <div className="bg-white p-8 rounded-[3rem] shadow-2xl border-t-8 border-primary overflow-x-auto">
+      {/* Piano - Responsive with horizontal scroll */}
+      <div className="bg-white p-4 md:p-8 rounded-3xl md:rounded-[3rem] shadow-2xl border-t-4 md:border-t-8 border-primary overflow-x-auto no-scrollbar">
           <PianoKeyboard activeNotes={activeNotes} onNoteClick={handleNoteClick} />
       </div>
 
       {/* AI Lesson Dialog */}
       <AlertDialog open={!!aiLesson} onOpenChange={() => setAiLesson(null)}>
-        <AlertDialogContent className="rounded-[2.5rem] p-8 max-w-md">
+        <AlertDialogContent className="rounded-3xl p-6 md:p-8 max-w-[90vw] md:max-w-md">
           <AlertDialogHeader className="items-center text-center space-y-4">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-               <BrainCircuit size={40} />
+            <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+               <BrainCircuit className="w-8 h-8 md:w-10 md:h-10" />
             </div>
-            <AlertDialogTitle className="text-3xl font-black">AI Kouč radí</AlertDialogTitle>
-            <AlertDialogDescription className="text-lg">
+            <AlertDialogTitle className="text-xl md:text-3xl font-black">AI Kouč radí</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm md:text-lg">
               {aiLesson?.instructions}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -464,7 +458,7 @@ export default function GameContainer() {
               setMode('identify');
               if (aiLesson?.clef === 'bass') setClef('bass');
               else if (aiLesson?.clef === 'treble') setClef('treble');
-            }} className="rounded-xl h-14 w-full text-lg font-bold">
+            }} className="rounded-xl h-12 md:h-14 w-full text-base md:text-lg font-bold">
               Rozumím!
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -473,16 +467,16 @@ export default function GameContainer() {
 
       {/* Results Dialog */}
       <AlertDialog open={showResults} onOpenChange={setShowResults}>
-        <AlertDialogContent className="rounded-[2.5rem] p-8 max-w-md">
+        <AlertDialogContent className="rounded-3xl p-6 md:p-8 max-w-[90vw] md:max-w-md">
           <AlertDialogHeader className="items-center text-center space-y-4">
-            <Trophy size={60} className="text-green-500" />
-            <AlertDialogTitle className="text-3xl font-black">Test dokončen!</AlertDialogTitle>
-            <AlertDialogDescription className="text-xl text-center">
+            <Trophy className="w-12 h-12 md:w-16 md:h-16 text-green-500" />
+            <AlertDialogTitle className="text-xl md:text-3xl font-black">Test dokončen!</AlertDialogTitle>
+            <AlertDialogDescription className="text-lg md:text-xl text-center">
               Skóre: <span className="font-bold">{testCorrectCount}</span> z 50.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-             <AlertDialogAction onClick={() => { setShowResults(false); setMode('study'); }} className="w-full h-14 rounded-xl">Pokračovat</AlertDialogAction>
+             <AlertDialogAction onClick={() => { setShowResults(false); setMode('study'); }} className="w-full h-12 md:h-14 rounded-xl">Pokračovat</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
