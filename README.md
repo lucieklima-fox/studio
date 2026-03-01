@@ -2,30 +2,32 @@
 
 Tato aplikace je vyvíjena v prostředí Next.js 15 s využitím Firebase (pro databázi a autentizaci) a Genkit (pro AI kouče).
 
-## Jak nasadit aplikaci ZDARMA (bez karty)
+## Jak nahrát projekt na GitHub (Krok za krokem)
 
-Pro nasazení doporučujeme **Netlify**, které nabízí bezplatný tarif a podporuje všechny funkce této aplikace (včetně AI).
+Pokud chcete projekt nahrát na GitHub, postupujte takto:
 
-### Krok 1: Nahrání na GitHub
-1. Vytvořte si nový repozitář na [GitHubu](https://github.com/new).
-2. Propojte svůj lokální kód s GitHubem:
+1. **Vytvořte si účet na GitHubu**: Jděte na [github.com](https://github.com/join) a zaregistrujte se.
+2. **Vytvořte nový repozitář**: Klikněte na [tento odkaz](https://github.com/new), pojmenujte svůj projekt (např. `melody-maestro`) a klikněte na "Create repository". **Nevybírejte** možnost "Initialize this repository with a README".
+3. **Získejte URL repozitáře**: Po vytvoření uvidíte URL adresu končící na `.git` (např. `https://github.com/vase-jmeno/melody-maestro.git`). Zkopírujte si ji.
+4. **Otevřete terminál**: V dolní části tohoto prostředí otevřete okno terminálu.
+5. **Spusťte tyto příkazy (jeden po druhém)**:
    ```bash
    git init
    git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/vase-jmeno/nazev-repozitáře.git
+   git commit -m "První verze Melody Maestro"
+   git branch -M main
+   git remote add origin <VAŠE_ZKOPIROVANA_URL_ADRESA_Z_KROKU_3>
    git push -u origin main
    ```
 
-### Krok 2: Propojení s Netlify
+## Jak nasadit na Netlify (ZDARMA a bez karty)
+
 1. Přihlaste se na [Netlify.com](https://www.netlify.com/).
 2. Klikněte na **"Add new site"** -> **"Import an existing project"**.
-3. Vyberte GitHub a svůj repozitář.
-4. Netlify automaticky detekuje Next.js a použije nastavení z přiloženého `netlify.toml`.
-
-### Krok 3: Nastavení Environment Variables
-V administraci Netlify (Site Settings -> Environment variables) přidejte tuto proměnnou:
-- `GOOGLE_GENAI_API_KEY`: Váš klíč pro Gemini (získáte ZDARMA na [Google AI Studio](https://aistudio.google.com/)).
+3. Vyberte **GitHub** a autorizujte Netlify. Vyberte svůj repozitář `melody-maestro`.
+4. Netlify automaticky detekuje Next.js a použije nastavení ze souboru `netlify.toml`. Klikněte na **"Deploy site"**.
+5. **DŮLEŽITÉ - AI KLÍČ**: Aby fungoval AI kouč, musíte v administraci Netlify (Site Settings -> Environment variables) přidat proměnnou:
+   - `GOOGLE_GENAI_API_KEY`: Váš klíč z [Google AI Studio](https://aistudio.google.com/).
 
 ## Lokální vývoj
 ```bash
@@ -34,4 +36,3 @@ npm run dev
 ```
 
 Aplikace poběží na `http://localhost:9002`.
-    
