@@ -24,7 +24,6 @@ import { useAuth, useFirestore, useCollection } from '@/firebase';
 import { collection, doc, query, orderBy, limit } from 'firebase/firestore';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
-import { Progress } from '@/components/ui/progress';
 import { generatePersonalizedPracticeSession, PersonalizedPracticeSessionGeneratorOutput } from '@/ai/flows/generate-personalized-practice-session';
 import {
   AlertDialog,
@@ -289,7 +288,7 @@ export default function GameContainer() {
                 generatePersonalizedPracticeSession({
                   challengingNotes: [...new Set(challengingNotes)],
                   challengingClefs: [...new Set(challengingClefs)],
-                  recentPerformanceSummary: "Uživatel procvičuje houslový i basový klíč v rozsahu C2-C5."
+                  recentPerformanceSummary: "Uživatel procvičuje houslový i basový klíč v rozsahu C2-C6."
                 }).then(setAiLesson).finally(() => setIsGeneratingLesson(false));
               }
             }}
@@ -310,7 +309,7 @@ export default function GameContainer() {
             <Card className="rounded-3xl md:rounded-[3rem] border-none shadow-xl md:shadow-2xl bg-white p-6 md:p-10 space-y-6 md:space-y-10">
               <div className="text-center space-y-2">
                 <h2 className="text-2xl md:text-4xl font-black text-primary tracking-tight">Interaktivní Stupnice</h2>
-                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej tóny od C2 do C5.</p>
+                <p className="text-sm md:text-xl text-muted-foreground font-medium">Prozkoumej tóny od C2 do C6.</p>
               </div>
               
               <div className="bg-muted/30 p-4 md:p-10 rounded-2xl md:rounded-[2.5rem] border-2 border-dashed border-primary/30 flex items-center justify-center min-h-[200px] md:min-h-[340px]">
@@ -325,12 +324,12 @@ export default function GameContainer() {
                   <div className="flex-1 space-y-2 md:space-y-4">
                     <div className="flex justify-between font-bold text-[10px] md:text-sm px-2 text-muted-foreground uppercase tracking-widest">
                        <span>C2</span>
-                       <span>C5</span>
+                       <span>C6</span>
                     </div>
                     <input 
                       type="range" 
                       min="36" 
-                      max="72" 
+                      max="84" 
                       value={studyMidi} 
                       onChange={(e) => {
                         const m = parseInt(e.target.value);
@@ -341,7 +340,7 @@ export default function GameContainer() {
                       className="w-full h-3 md:h-4 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
                     />
                   </div>
-                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => setStudyMidi(m => Math.min(72, m + 1))}>
+                  <Button variant="outline" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full shrink-0" onClick={() => setStudyMidi(m => Math.min(84, m + 1))}>
                     <ChevronRight size={20} />
                   </Button>
                 </div>
@@ -424,7 +423,7 @@ export default function GameContainer() {
                     <Trophy className="w-8 h-8 md:w-12 md:h-12" />
                 </div>
                 <h2 className="text-2xl md:text-4xl font-black">Mistrovství 50 Not</h2>
-                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C5.</p>
+                <p className="text-sm md:text-xl text-muted-foreground max-w-lg mx-auto">Kompletní test od C2 do C6.</p>
                 <Button onClick={() => { setIsTestActive(true); setTestIndex(0); setTestCorrectCount(0); }} size="lg" className="w-full sm:w-auto rounded-xl md:rounded-2xl h-16 md:h-20 px-8 md:px-12 text-lg md:text-2xl font-bold shadow-xl">
                   Spustit Test
                 </Button>

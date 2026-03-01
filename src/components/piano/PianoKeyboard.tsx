@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { PIANO_KEYS, OCTAVES } from '@/lib/music-constants';
 import { cn } from '@/lib/utils';
-import { midiToNote, noteToMidi } from '@/lib/music-logic';
+import { noteToMidi } from '@/lib/music-logic';
 
 interface PianoKeyboardProps {
   activeNotes?: string[];
@@ -35,7 +35,7 @@ export function PianoKeyboard({
           midi
         };
       })
-    ).filter(key => key.midi >= 36 && key.midi <= 72);
+    ).filter(key => key.midi >= 36 && key.midi <= 84);
   }, []);
 
   return (

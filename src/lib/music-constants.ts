@@ -1,6 +1,6 @@
 /**
  * @fileOverview Core music constants for the Melody Maestro application.
- * Focused strictly on the educational range C2 to C5.
+ * Focused strictly on the educational range C2 to C6.
  */
 
 export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const;
@@ -21,9 +21,9 @@ export const PIANO_KEYS = [
   { name: 'B', type: 'white' },
 ] as const;
 
-export const OCTAVES = [2, 3, 4, 5] as const;
+export const OCTAVES = [2, 3, 4, 5, 6] as const;
 
 export const KEYBOARD_RANGE = {
   minMidi: 36, // C2
-  maxMidi: 72  // C5
+  maxMidi: 84  // C6
 };

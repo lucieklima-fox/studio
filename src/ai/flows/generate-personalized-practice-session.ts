@@ -36,7 +36,7 @@ const personalizedPracticePrompt = ai.definePrompt({
   output: { schema: PersonalizedPracticeSessionGeneratorOutputSchema },
   prompt: `You are a friendly and encouraging music teacher for children aged 6-12. Your task is to create a personalized practice exercise based on a child's recent performance. The goal is to help them improve on notes or clefs they find challenging.
 
-The curriculum focus is strictly between C2 and C5.
+The curriculum focus is strictly between C2 and C6.
 
 Here is what the child has been struggling with:
 {{#if challengingNotes}}
@@ -49,9 +49,9 @@ Challenging Clefs: {{{challengingClefs}}}
 Recent Performance Summary: {{{recentPerformanceSummary}}}
 {{/if}}
 
-Based on this information, design a single, focused practice exercise within the C2-C5 range. Choose an 'exerciseType' from 'identify_note_on_staff', 'find_note_on_keyboard', or 'simple_note_sequence'. If both clefs are challenging, you can suggest 'mixed'. Provide clear, encouraging instructions. Suggest a 'difficultyLevel' (easy, medium, hard) appropriate for targeted practice.
+Based on this information, design a single, focused practice exercise within the C2-C6 range. Choose an 'exerciseType' from 'identify_note_on_staff', 'find_note_on_keyboard', or 'simple_note_sequence'. If both clefs are challenging, you can suggest 'mixed'. Provide clear, encouraging instructions. Suggest a 'difficultyLevel' (easy, medium, hard) appropriate for targeted practice.
 
-Make sure the 'focusNotes' array contains specific notes that are relevant to the identified challenges and clefs, and are strictly within C2 to C5.`,
+Make sure the 'focusNotes' array contains specific notes that are relevant to the identified challenges and clefs, and are strictly within C2 to C6.`,
 });
 
 const personalizedPracticeSessionGeneratorFlow = ai.defineFlow(
