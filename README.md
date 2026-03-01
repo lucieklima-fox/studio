@@ -4,7 +4,7 @@ Tato aplikace je vyvíjena v prostředí Next.js 15 s využitím Firebase (pro d
 
 ## Jak nasadit aplikaci ZDARMA (bez karty)
 
-Pro nasazení doporučujeme **Netlify**, které nabízí bezplatný tarif a podporuje všechny funkce této aplikace.
+Pro nasazení doporučujeme **Netlify**, které nabízí bezplatný tarif a podporuje všechny funkce této aplikace (včetně AI).
 
 ### Krok 1: Nahrání na GitHub
 1. Vytvořte si nový repozitář na [GitHubu](https://github.com/new).
@@ -24,9 +24,8 @@ Pro nasazení doporučujeme **Netlify**, které nabízí bezplatný tarif a podp
 4. Netlify automaticky detekuje Next.js a použije nastavení z přiloženého `netlify.toml`.
 
 ### Krok 3: Nastavení Environment Variables
-V administraci Netlify (Site Settings -> Environment variables) přidejte tyto proměnné:
-- `GOOGLE_GENAI_API_KEY`: Váš klíč pro Gemini (získáte na [Google AI Studio](https://aistudio.google.com/)).
-- Firebase konfigurační hodnoty ze souboru `src/firebase/config.ts` (pokud je chcete mít zabezpečené, jinak jsou v kódu).
+V administraci Netlify (Site Settings -> Environment variables) přidejte tuto proměnnou:
+- `GOOGLE_GENAI_API_KEY`: Váš klíč pro Gemini (získáte ZDARMA na [Google AI Studio](https://aistudio.google.com/)).
 
 ## Lokální vývoj
 ```bash
@@ -35,3 +34,4 @@ npm run dev
 ```
 
 Aplikace poběží na `http://localhost:9002`.
+    
