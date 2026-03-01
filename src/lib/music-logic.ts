@@ -12,9 +12,21 @@ const letterIndexMap: Record<string, number> = {
   C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6
 };
 
-const baseOffsetMap: Record<string, number> = {
-  C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11
-};
+// Mapování půltónů v rámci oktávy (0-11)
+const semitoneMap: { letter: NoteLetter, accidental: Accidental }[] = [
+  { letter: 'C', accidental: 'natural' }, // 0
+  { letter: 'C', accidental: 'sharp' },   // 1
+  { letter: 'D', accidental: 'natural' }, // 2
+  { letter: 'D', accidental: 'sharp' },   // 3
+  { letter: 'E', accidental: 'natural' }, // 4
+  { letter: 'F', accidental: 'natural' }, // 5
+  { letter: 'F', accidental: 'sharp' },   // 6
+  { letter: 'G', accidental: 'natural' }, // 7
+  { letter: 'G', accidental: 'sharp' },   // 8
+  { letter: 'A', accidental: 'natural' }, // 9
+  { letter: 'A', accidental: 'sharp' },   // 10
+  { letter: 'B', accidental: 'natural' }, // 11
+];
 
 const TREBLE_ANCHOR = 30; // E4 (Diatonic index: 4*7 + 2)
 const BASS_ANCHOR = 18;   // G2 (Diatonic index: 2*7 + 4)
@@ -37,29 +49,15 @@ export type MusicalNote = {
 export function midiToNote(midi: number, clef: Clef = "treble"): MusicalNote {
   const octave = Math.floor(midi / 12) - 1;
   const semitone = midi % 12;
-
-  let letter: NoteLetter = "C";
-  let accidental: Accidental = "natural";
-
-  for (const [ltr, offset] of Object.entries(baseOffsetMap)) {
-    if (offset === semitone) {
-      letter = ltr as NoteLetter;
-      accidental = "natural";
-      break;
-    } else if (offset + 1 === semitone) {
-      letter = ltr as NoteLetter;
-      accidental = "sharp";
-      break;
-    }
-  }
+  const { letter, accidental } = semitoneMap[semitone];
 
   return { letter, octave, accidental, clef };
 }
 
 export function noteToMidi(note: MusicalNote): number {
-  const base = baseOffsetMap[note.letter];
-  const accidentalOffset = note.accidental === "sharp" ? 1 : 0;
-  return 12 * (note.octave + 1) + base + accidentalOffset;
+  const octaveOffset = (note.octave + 1) * 12;
+  const semitoneOffset = semitoneMap.findIndex(s => s.letter === note.letter && s.accidental === note.accidental);
+  return octaveOffset + semitoneOffset;
 }
 
 export function noteToTone(note: MusicalNote): string {
@@ -88,23 +86,17 @@ export function getCzechNoteName(note: MusicalNote): string {
 
   switch (note.octave) {
     case 1: 
-      // Kontra: A1, H1
-      return `${fullBaseName}1`;
+      return `${fullBaseName}1`; // Kontra A1, H1
     case 2: 
-      // Velká: C, D, E...
-      return fullBaseName;
+      return fullBaseName;      // Velká C, D...
     case 3: 
-      // Malá: c, d, e...
-      return fullBaseName;
+      return fullBaseName;      // Malá c, d...
     case 4: 
-      // Jednočárkovaná: c1, d1...
-      return `${fullBaseName}1`;
+      return `${fullBaseName}1`; // Jednočárkovaná c1...
     case 5: 
-      // Dvoučárkovaná: c2, d2...
-      return `${fullBaseName}2`;
+      return `${fullBaseName}2`; // Dvoučárkovaná c2...
     case 6: 
-      // Tříčárkovaná: c3, d3...
-      return `${fullBaseName}3`;
+      return `${fullBaseName}3`; // Tříčárkovaná c3...
     default: 
       return `${fullBaseName}${note.octave}`;
   }

@@ -67,7 +67,7 @@ export function PianoKeyboard({
                   "absolute bottom-3 left-0 right-0 text-[10px] md:text-[13px] font-black transition-all",
                   (key.isC || isActive) 
                     ? "opacity-100 text-primary scale-110" 
-                    : "text-muted-foreground/10"
+                    : "text-muted-foreground/30"
                 )}>
                   {key.label}
                 </span>
