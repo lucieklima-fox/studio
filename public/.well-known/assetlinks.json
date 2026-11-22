@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "cz.foxnoty.app",
+        "sha256_cert_fingerprints": ["11:2C:97:4B:70:BC:75:8F:8B:7F:8B:2F:19:95:3E:D9:E2:51:CA:AA:22:CE:F1:47:EA:8F:38:AB:51:7A:40:45"]
+      }
+    }]
