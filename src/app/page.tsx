@@ -6,6 +6,7 @@ import {
   FilterMode,
   NOTE_COLORS,
   NOTES_BY_CLEF,
+  OctaveFilter,
   Staff,
 } from "@/components/Staff";
 import { playTone } from "@/lib/sound";
@@ -20,7 +21,6 @@ const WHITE_KEYS = [
   { base: "h", label: "H" },
 ];
 
-// Černé půltónové klávesy (s českým pojmenováním)
 const BLACK_KEYS = [
   { id: "cis-des", labels: ["cis", "des"], display: "cis/des", leftPct: 10.5 },
   { id: "dis-es", labels: ["dis", "es"], display: "dis/es", leftPct: 24.8 },
@@ -32,6 +32,7 @@ const BLACK_KEYS = [
 export default function HomePage() {
   const [mode, setMode] = useState<"study" | "quiz">("study");
   const [clef, setClef] = useState<ClefType>("treble");
+  const [octaveFilter, setOctaveFilter] = useState<OctaveFilter>("all");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [colorHints, setColorHints] = useState(true);
   const [index, setIndex] = useState(0);
@@ -51,14 +52,17 @@ export default function HomePage() {
     }
   }, []);
 
-  // Filtrovaný seznam tónů podle klíče a posuvek
   const notes = useMemo(() => {
-    const list = NOTES_BY_CLEF[clef];
+    let list = NOTES_BY_CLEF[clef];
+    if (octaveFilter !== "all") {
+      const byOctave = list.filter((n) => n.octaveKey === octaveFilter);
+      if (byOctave.length > 0) list = byOctave;
+    }
     if (filterMode === "natural") return list.filter((n) => n.accidental === "natural");
     if (filterMode === "sharps") return list.filter((n) => n.accidental !== "flat");
     if (filterMode === "flats") return list.filter((n) => n.accidental !== "sharp");
     return list;
-  }, [clef, filterMode]);
+  }, [clef, octaveFilter, filterMode]);
 
   const currentNote = notes[index] || notes[0];
   const masteryPct =
@@ -74,7 +78,6 @@ export default function HomePage() {
     setActiveKey(null);
   };
 
-  // Zpracování stisku bílé klávesy (základní tón) nebo černé klávesy (křížek/béčko)
   const handleKeyPress = (acceptedPitchClasses: string[], keyId: string) => {
     if (mode === "study") {
       const foundIdx = notes.findIndex((n) =>
@@ -84,7 +87,6 @@ export default function HomePage() {
         setIndex(foundIdx);
         playTone(notes[foundIdx].freq);
       } else {
-        // Pokud je zapnutý filtr jen na základní tóny a uživatel klikne na černou klávesu
         const fallback = NOTES_BY_CLEF[clef].find((n) =>
           acceptedPitchClasses.includes(n.pitchClass)
         );
@@ -93,7 +95,6 @@ export default function HomePage() {
       return;
     }
 
-    // Režim Kvíz
     const isMatch = acceptedPitchClasses.includes(currentNote.pitchClass);
     const updatedStats = {
       correct: stats.correct + (isMatch ? 1 : 0),
@@ -124,16 +125,27 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-amber-50 via-orange-50/40 to-indigo-50 text-slate-900 flex justify-center">
+    <div
+      className="min-h-[100dvh] text-slate-900 flex justify-center"
+      style={{
+        background:
+          "linear-gradient(135deg, #fff7ed 0%, #fef3c7 45%, #eef2ff 100%)",
+      }}
+    >
       <div className="w-full max-w-md flex flex-col justify-between px-4 py-3 gap-2">
-        {/* Barevná horní lišta */}
+        {/* Horní barevná lišta */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white shadow-sm flex items-center justify-center text-2xl">
+            <div
+              className="w-11 h-11 rounded-2xl text-white shadow-sm flex items-center justify-center text-2xl"
+              style={{
+                background: "linear-gradient(135deg, #f97316, #f59e0b)",
+              }}
+            >
               🦊
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tight bg-gradient-to-r from-orange-600 to-indigo-600 bg-clip-text text-transparent">
+              <h1 className="text-lg font-black tracking-tight text-orange-600">
                 Foxnoty
               </h1>
               <p className="text-xs font-medium text-slate-500">Melody Maestro</p>
@@ -143,16 +155,15 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setColorHints(!colorHints)}
-              title="Zapnout/vypnout barevné noty"
               className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition ${
                 colorHints
-                  ? "bg-gradient-to-r from-pink-500 to-amber-500 text-white border-transparent shadow-sm"
+                  ? "bg-orange-500 text-white border-orange-500 shadow-sm"
                   : "bg-white text-slate-500 border-slate-200"
               }`}
             >
               🎨 Barvy
             </button>
-            <div className="bg-white/90 border border-orange-100 rounded-xl px-3 py-1 text-right shadow-sm">
+            <div className="bg-white/95 border border-orange-200 rounded-xl px-3 py-1 text-right shadow-sm">
               <span className="block text-[10px] font-semibold text-slate-400 uppercase">
                 Mistrovství
               </span>
@@ -164,7 +175,7 @@ export default function HomePage() {
         </header>
 
         {/* Přepínač Studium / Kvíz */}
-        <div className="grid grid-cols-2 bg-white/80 border border-orange-100 p-1 rounded-2xl shadow-sm">
+        <div className="grid grid-cols-2 bg-white/90 border border-orange-200 p-1 rounded-2xl shadow-sm">
           <button
             onClick={() => {
               setMode("study");
@@ -172,7 +183,7 @@ export default function HomePage() {
             }}
             className={`py-2 text-sm font-extrabold rounded-xl transition ${
               mode === "study"
-                ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow"
+                ? "bg-indigo-600 text-white shadow"
                 : "text-slate-600"
             }`}
           >
@@ -186,7 +197,7 @@ export default function HomePage() {
             }}
             className={`py-2 text-sm font-extrabold rounded-xl transition ${
               mode === "quiz"
-                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow"
+                ? "bg-orange-500 text-white shadow"
                 : "text-slate-600"
             }`}
           >
@@ -194,20 +205,45 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Filtry: Klíč + Posuvky (♯/♭) + Zvuk */}
+        {/* Filtry: Klíč + Oktáva + Posuvky + Zvuk */}
         <div className="grid grid-cols-12 gap-1.5">
           <select
             value={clef}
             onChange={(e) => {
               setClef(e.target.value as ClefType);
+              setOctaveFilter("all");
               setIndex(0);
               setStatus("idle");
             }}
             aria-label="Výběr klíče"
-            className="col-span-5 bg-white border border-indigo-100 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 shadow-sm"
+            className="col-span-4 bg-white border border-indigo-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-800 shadow-sm"
           >
-            <option value="treble">🎼 Houslový klíč</option>
-            <option value="bass">𝄢 Basový klíč</option>
+            <option value="treble">🎼 Houslový</option>
+            <option value="bass">𝄢 Basový</option>
+          </select>
+
+          <select
+            value={octaveFilter}
+            onChange={(e) => {
+              setOctaveFilter(e.target.value as OctaveFilter);
+              setIndex(0);
+              setStatus("idle");
+            }}
+            aria-label="Výběr oktávy"
+            className="col-span-4 bg-white border border-indigo-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-800 shadow-sm"
+          >
+            <option value="all">Všechny oktávy</option>
+            {clef === "bass" && (
+              <option value="kontra-velka">Kontra & Velká (A1–H)</option>
+            )}
+            <option value="mala">Malá oktáva (c–h)</option>
+            <option value="jednocarkovana">Jednočárkovaná (c1–h1)</option>
+            {clef === "treble" && (
+              <>
+                <option value="dvoucarkovana">Dvoučárkovaná (c2–h2)</option>
+                <option value="tricarkovana">Tříčárkovaná (c3–g3)</option>
+              </>
+            )}
           </select>
 
           <select
@@ -218,20 +254,13 @@ export default function HomePage() {
               setStatus("idle");
             }}
             aria-label="Výběr posuvek"
-            className="col-span-4 bg-white border border-indigo-100 rounded-xl px-2 py-2 text-xs font-bold text-slate-800 shadow-sm"
+            className="col-span-4 bg-white border border-indigo-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-800 shadow-sm"
           >
-            <option value="all">♯♭ Všechny tóny</option>
-            <option value="natural">♮ Základní (C–H)</option>
-            <option value="sharps">♯ S křížky</option>
-            <option value="flats">♭ S béčky</option>
+            <option value="all">♯♭ Vše</option>
+            <option value="natural">♮ Základní</option>
+            <option value="sharps">♯ Křížky</option>
+            <option value="flats">♭ Béčka</option>
           </select>
-
-          <button
-            onClick={() => playTone(currentNote.freq)}
-            className="col-span-3 bg-indigo-600 text-white rounded-xl py-2 text-xs font-extrabold shadow-sm active:scale-95 transition"
-          >
-            🔊 Zvuk
-          </button>
         </div>
 
         {/* Notová osnova */}
@@ -245,16 +274,22 @@ export default function HomePage() {
           />
 
           {mode === "study" ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => {
                   const next = (index - 1 + notes.length) % notes.length;
                   setIndex(next);
                   playTone(notes[next].freq);
                 }}
-                className="bg-white border border-indigo-100 rounded-xl py-2 text-sm font-bold text-indigo-700 shadow-sm active:bg-indigo-50"
+                className="bg-white border border-indigo-200 rounded-xl py-2 text-xs font-bold text-indigo-700 shadow-sm active:bg-indigo-50"
               >
                 ← Předchozí
+              </button>
+              <button
+                onClick={() => playTone(currentNote.freq)}
+                className="bg-indigo-600 text-white rounded-xl py-2 text-xs font-extrabold shadow-sm active:scale-95"
+              >
+                🔊 Zvuk
               </button>
               <button
                 onClick={() => {
@@ -262,31 +297,36 @@ export default function HomePage() {
                   setIndex(next);
                   playTone(notes[next].freq);
                 }}
-                className="bg-white border border-indigo-100 rounded-xl py-2 text-sm font-bold text-indigo-700 shadow-sm active:bg-indigo-50"
+                className="bg-white border border-indigo-200 rounded-xl py-2 text-xs font-bold text-indigo-700 shadow-sm active:bg-indigo-50"
               >
                 Další →
               </button>
             </div>
           ) : (
-            <div className="bg-white/90 border border-orange-100 rounded-xl px-3 py-2 flex justify-between items-center text-xs shadow-sm">
+            <div className="bg-white/95 border border-orange-200 rounded-xl px-3 py-2 flex justify-between items-center text-xs shadow-sm">
               <span>
                 Série: <strong className="text-orange-600">{streak}</strong> 🔥
               </span>
               <span className="font-semibold text-slate-700">{feedback}</span>
+              <button
+                onClick={() => playTone(currentNote.freq)}
+                className="text-indigo-600 font-extrabold underline"
+              >
+                🔊 Zvuk
+              </button>
             </div>
           )}
         </main>
 
         {/* Mobilní piano klaviatura (bílé C–H + černé půltónové klávesy) */}
         <section className="mt-auto">
-          <p className="text-[11px] font-medium text-slate-500 text-center mb-1.5">
+          <p className="text-[11px] font-medium text-slate-600 text-center mb-1.5">
             {mode === "study"
               ? "Zahraj tón na klaviatuře (včetně křížků a béček):"
               : "Stiskni správnou klávesu:"}
           </p>
 
           <div className="relative h-28 select-none">
-            {/* Bílé klávesy */}
             <div className="grid grid-cols-7 gap-1 h-full">
               {WHITE_KEYS.map((k) => {
                 const toneColor = NOTE_COLORS[k.base];
@@ -307,7 +347,7 @@ export default function HomePage() {
                   >
                     {colorHints && (
                       <span
-                        className="w-3 h-3 rounded-full mb-1"
+                        className="w-3.5 h-3.5 rounded-full mb-1 shadow-xs"
                         style={{ backgroundColor: toneColor }}
                       />
                     )}
@@ -317,7 +357,6 @@ export default function HomePage() {
               })}
             </div>
 
-            {/* Černé klávesy (křížky a béčka) */}
             {BLACK_KEYS.map((bk) => {
               const isWrong = activeKey === bk.display && status === "wrong";
               const isCorrect = activeKey === bk.display && status === "correct";
@@ -342,19 +381,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Patička + Ochrana soukromí */}
-        <footer className="flex justify-between items-center text-[11px] text-slate-400 pt-0.5">
+        {/* Patička */}
+        <footer className="flex justify-between items-center text-[11px] text-slate-500 pt-0.5">
           <span>Foxnoty © 2026</span>
           <button
             onClick={() => setShowPrivacy(true)}
-            className="text-indigo-600 font-medium underline"
+            className="text-indigo-600 font-semibold underline"
           >
             Ochrana soukromí
           </button>
         </footer>
       </div>
 
-      {/* Modální okno Zásady ochrany osobních údajů */}
       {showPrivacy && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-5 z-50">
           <div className="bg-white rounded-2xl p-5 max-w-sm flex flex-col gap-3 text-sm leading-relaxed shadow-xl">
