@@ -25,15 +25,15 @@ export interface NoteItem {
   octaveName: string;
 }
 
-// Jemné pastelové barvy pro jednotlivé tóny
+// Jemné pastelové unisex barvy ladící se zlatou (pro kluky i pro holky)
 export const NOTE_COLORS: Record<string, string> = {
-  c: "#f472b6", // pastelová růžová
-  d: "#fb923c", // pastelová meruňková
-  e: "#facc15", // pastelová vanilkově žlutá
-  f: "#34d399", // pastelová mátová
-  g: "#38bdf8", // pastelová nebesky modrá
-  a: "#818cf8", // pastelová levandulová
-  h: "#c084fc", // pastelová šeříková
+  c: "#f59e0b", // teplá zlatá
+  d: "#fb923c", // meruňková
+  e: "#eab308", // sluneční
+  f: "#34d399", // šalvějově mátová
+  g: "#2dd4bf", // jemná tyrkysová
+  a: "#38bdf8", // nebeská modrá
+  h: "#60a5fa", // chrpa
 };
 
 export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
@@ -87,7 +87,6 @@ export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
   ],
 
   bass: [
-    // Kontra a Velká oktáva
     { id: "b-A1", base: "a", accidental: "natural", pitchClass: "a", label: "A1", step: -4, freq: 55.00, octaveKey: "kontra-velka", octaveName: "Kontra oktáva" },
     { id: "b-H1", base: "h", accidental: "natural", pitchClass: "h", label: "H1", step: -3, freq: 61.74, octaveKey: "kontra-velka", octaveName: "Kontra oktáva" },
     { id: "b-C", base: "c", accidental: "natural", pitchClass: "c", label: "C", step: -2, freq: 65.41, octaveKey: "kontra-velka", octaveName: "Velká oktáva" },
@@ -103,7 +102,6 @@ export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
     { id: "b-B", base: "h", accidental: "flat", pitchClass: "b", label: "B (Hes)", step: 4, freq: 116.54, octaveKey: "kontra-velka", octaveName: "Velká oktáva" },
     { id: "b-H", base: "h", accidental: "natural", pitchClass: "h", label: "H", step: 4, freq: 123.47, octaveKey: "kontra-velka", octaveName: "Velká oktáva" },
 
-    // Malá oktáva (c - h)
     { id: "b-c", base: "c", accidental: "natural", pitchClass: "c", label: "c", step: 5, freq: 130.81, octaveKey: "mala", octaveName: "Malá oktáva" },
     { id: "b-cis", base: "c", accidental: "sharp", pitchClass: "cis", label: "cis", step: 5, freq: 138.59, octaveKey: "mala", octaveName: "Malá oktáva" },
     { id: "b-d", base: "d", accidental: "natural", pitchClass: "d", label: "d", step: 6, freq: 146.83, octaveKey: "mala", octaveName: "Malá oktáva" },
@@ -117,7 +115,6 @@ export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
     { id: "b-b", base: "h", accidental: "flat", pitchClass: "b", label: "b (hes)", step: 11, freq: 233.08, octaveKey: "mala", octaveName: "Malá oktáva" },
     { id: "b-h", base: "h", accidental: "natural", pitchClass: "h", label: "h", step: 11, freq: 246.94, octaveKey: "mala", octaveName: "Malá oktáva" },
 
-    // Jednočárkovaná oktáva nad basovou osnovou (c1 - e1)
     { id: "b-c1", base: "c", accidental: "natural", pitchClass: "c", label: "c1", step: 12, freq: 261.63, octaveKey: "jednocarkovana", octaveName: "Jednočárkovaná" },
     { id: "b-d1", base: "d", accidental: "natural", pitchClass: "d", label: "d1", step: 13, freq: 293.66, octaveKey: "jednocarkovana", octaveName: "Jednočárkovaná" },
     { id: "b-e1", base: "e", accidental: "natural", pitchClass: "e", label: "e1", step: 14, freq: 329.63, octaveKey: "jednocarkovana", octaveName: "Jednočárkovaná" },
@@ -141,27 +138,27 @@ export const Staff: React.FC<StaffProps> = ({
 }) => {
   const lineSpacing = 13;
   const halfStep = lineSpacing / 2;
-  const bottomLineY = 138;
+  const bottomLineY = 138; // 1. linka (e1 v houslovém, G v basovém)
   const noteY = bottomLineY - (activeNote.step - 2) * halfStep;
   const noteX = 215;
 
-  const baseToneColor = NOTE_COLORS[activeNote.base] || "#818cf8";
+  const baseToneColor = NOTE_COLORS[activeNote.base] || "#f59e0b";
 
   const noteColor =
     status === "correct"
       ? "#10b981"
       : status === "wrong"
-      ? "#f43f5e"
+      ? "#ef4444"
       : colorHints
       ? baseToneColor
-      : "#475569";
+      : "#334155";
 
   const borderClass =
     status === "correct"
       ? "border-emerald-300 ring-4 ring-emerald-100"
       : status === "wrong"
       ? "border-rose-300 ring-4 ring-rose-100"
-      : "border-purple-100";
+      : "border-amber-200/80";
 
   const ledgerLinesY: number[] = [];
   if (activeNote.step <= 0) {
@@ -179,9 +176,9 @@ export const Staff: React.FC<StaffProps> = ({
     <div
       className={`relative w-full bg-white/95 rounded-3xl border-2 ${borderClass} p-3 shadow-sm transition-all overflow-hidden`}
     >
-      {/* Jemné pastelové dekorace v rozích karty */}
-      <span className="absolute top-2.5 left-3.5 text-sm opacity-45 select-none">✨</span>
-      <span className="absolute top-2.5 right-3.5 text-sm opacity-45 select-none">🎵</span>
+      {/* Zlaté dekorační hvězdičky v rozích karty */}
+      <span className="absolute top-2.5 left-3.5 text-sm text-amber-400 select-none">✦</span>
+      <span className="absolute top-2.5 right-3.5 text-sm text-amber-400 select-none">♪</span>
 
       <svg
         viewBox="0 0 320 205"
@@ -189,7 +186,7 @@ export const Staff: React.FC<StaffProps> = ({
         role="img"
         aria-label={`Notová osnova – ${showLabel ? activeNote.label : "hádání tónu"}`}
       >
-        {/* 5 jemných linek notové osnovy */}
+        {/* 5 linek notové osnovy */}
         {[0, 1, 2, 3, 4].map((lineIndex) => {
           const y = bottomLineY - lineIndex * lineSpacing;
           return (
@@ -199,61 +196,43 @@ export const Staff: React.FC<StaffProps> = ({
               y1={y}
               x2="300"
               y2={y}
-              stroke="#cbd5e1"
+              stroke="#94a3b8"
               strokeWidth="1.5"
             />
           );
         })}
 
-        {/* Kaligrafický houslový a basový klíč přesně podle předlohy */}
+        {/* Houslový klíč – spirála obepíná 2. linku (g1, Y=125), stoupá vzhůru do smyčky a končí tečkou dole */}
         {clef === "treble" ? (
-          <g transform="translate(36, 56) scale(0.55)">
+          <g fill="none" stroke="#92400e" strokeLinecap="round" strokeLinejoin="round">
+            {/* Začátek na 2. lince (g1, Y=125), spirála doprava dolů k 1. lince (Y=138), pak vlevo nahoru nad osnovu */}
             <path
-              fill="#7c3aed"
-              d="M 56 126
-                 C 50 120, 52 108, 63 107
-                 C 75 106, 84 117, 81 130
-                 C 78 144, 62 152, 47 148
-                 C 28 143, 20 122, 28 102
-                 C 36 82, 58 68, 66 47
-                 C 72 32, 68 15, 58 8
-                 C 49 16, 44 34, 48 53
-                 L 68 164
-                 C 71 178, 62 190, 48 190
-                 C 36 190, 28 181, 30 171
-                 C 32 163, 40 160, 46 164
-                 C 51 168, 50 176, 43 179
-                 C 46 184, 55 184, 60 178
-                 C 64 173, 64 166, 62 158
-                 L 43 53
-                 C 38 28, 46 6, 59 0
-                 C 74 8, 81 30, 74 52
-                 C 66 74, 43 88, 36 107
-                 C 30 123, 37 139, 51 143
-                 C 63 146, 74 139, 75 128
-                 C 76 119, 69 113, 61 114
-                 C 55 115, 54 121, 57 125 Z"
+              strokeWidth="3.6"
+              d="M 65 127
+                 C 61 124, 62 116, 69 116
+                 C 77 116, 82 124, 79 132
+                 C 76 140, 64 143, 55 138
+                 C 44 132, 43 116, 54 104
+                 C 64 93, 76 81, 74 67
+                 C 72 58, 63 58, 62 68
+                 L 67 154
+                 C 68 163, 60 168, 53 164"
             />
+            {/* Kulatá tečka na konci dole vlevo */}
+            <circle cx="52" cy="161" r="4.2" fill="#92400e" stroke="none" />
           </g>
         ) : (
-          <g transform="translate(40, 81) scale(0.54)">
+          /* Basový klíč – velká kulatá tečka na 4. lince (f, Y=99) + oblouk + dvě tečky kolem 4. linky */
+          <g fill="none" stroke="#0f766e" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="53" cy="99" r="5" fill="#0f766e" stroke="none" />
             <path
-              fill="#f97316"
-              d="M 28 45
-                 C 18 45, 11 37, 12 26
-                 C 14 10, 31 0, 50 0
-                 C 76 0, 94 18, 94 44
-                 C 94 74, 68 98, 22 116
-                 L 19 110
-                 C 56 91, 77 69, 77 42
-                 C 77 20, 63 8, 45 8
-                 C 30 8, 20 16, 20 25
-                 C 22 22, 26 21, 30 21
-                 C 38 21, 44 27, 44 35
-                 C 44 43, 37 49, 28 45 Z"
+              strokeWidth="3.8"
+              d="M 53 99
+                 C 63 85, 81 90, 81 108
+                 C 81 124, 66 135, 48 141"
             />
-            <circle cx="107" cy="21" r="7.5" fill="#f97316" />
-            <circle cx="107" cy="46" r="7.5" fill="#f97316" />
+            <circle cx="90" cy="92.5" r="2.6" fill="#0f766e" stroke="none" />
+            <circle cx="90" cy="105.5" r="2.6" fill="#0f766e" stroke="none" />
           </g>
         )}
 
@@ -265,7 +244,7 @@ export const Staff: React.FC<StaffProps> = ({
             y1={ly}
             x2={noteX + 18}
             y2={ly}
-            stroke="#94a3b8"
+            stroke="#64748b"
             strokeWidth="1.8"
           />
         ))}
@@ -320,11 +299,11 @@ export const Staff: React.FC<StaffProps> = ({
         )}
       </svg>
 
-      {/* Pastelový štítek s názvem tónu */}
+      {/* Štítek s názvem tónu */}
       <div className="h-8 flex items-center justify-center">
         {showLabel ? (
           <span
-            className="px-4 py-0.5 rounded-full text-sm font-extrabold text-slate-800 shadow-xs"
+            className="px-4 py-0.5 rounded-full text-sm font-extrabold text-slate-900 shadow-xs"
             style={{ backgroundColor: noteColor }}
           >
             {activeNote.label}{" "}
@@ -333,8 +312,8 @@ export const Staff: React.FC<StaffProps> = ({
             </span>
           </span>
         ) : (
-          <span className="text-xs font-semibold text-purple-400">
-            Poznej tón na osnově 🌸
+          <span className="text-xs font-semibold text-amber-700">
+            Poznej tón na osnově ✦
           </span>
         )}
       </div>
