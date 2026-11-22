@@ -4,6 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Foxnoty – Melody Maestro',
   description: 'Interaktivní hudební výuka čtení not, posuvek a hry na klavír v češtině.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -21,7 +22,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased bg-slate-50 text-slate-900">
+      <body className="font-body antialiased bg-amber-50 text-slate-800">
         {children}
       </body>
     </html>
