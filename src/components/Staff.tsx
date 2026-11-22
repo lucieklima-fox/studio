@@ -5,7 +5,13 @@ import React from "react";
 export type ClefType = "treble" | "bass";
 export type AccidentalType = "natural" | "sharp" | "flat";
 export type FilterMode = "natural" | "sharps" | "flats" | "all";
-export type OctaveFilter = "all" | "kontra-velka" | "mala" | "jednocarkovana" | "dvoucarkovana" | "tricarkovana";
+export type OctaveFilter =
+  | "all"
+  | "kontra-velka"
+  | "mala"
+  | "jednocarkovana"
+  | "dvoucarkovana"
+  | "tricarkovana";
 
 export interface NoteItem {
   id: string;
@@ -13,24 +19,24 @@ export interface NoteItem {
   accidental: AccidentalType;
   pitchClass: string;
   label: string;
-  step: number; // 2 = spodní linka osnovy (e1 v houslovém, G v basovém)
+  step: number;
   freq: number;
   octaveKey: OctaveFilter;
   octaveName: string;
 }
 
+// Jemné pastelové unisex barvy ladící se zlatou (pro kluky i pro holky)
 export const NOTE_COLORS: Record<string, string> = {
-  c: "#ef4444", // červená
-  d: "#f97316", // oranžová
-  e: "#eab308", // žlutá
-  f: "#22c55e", // zelená
-  g: "#06b6d4", // tyrkysová
-  a: "#3b82f6", // modrá
-  h: "#a855f7", // fialová
+  c: "#f59e0b", // teplá zlatá
+  d: "#fb923c", // meruňková
+  e: "#eab308", // sluneční
+  f: "#34d399", // šalvějově mátová
+  g: "#2dd4bf", // jemná tyrkysová
+  a: "#38bdf8", // nebeská modrá
+  h: "#60a5fa", // chrpa
 };
 
 export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
-  // HOUSLOVÝ KLÍČ: malá oktáva (g–h), jednočárkovaná (c1–h1), dvoučárkovaná (c2–h2), tříčárkovaná (c3–g3)
   treble: [
     // Malá oktáva pod osnovou
     { id: "t-g", base: "g", accidental: "natural", pitchClass: "g", label: "g", step: -3, freq: 196.00, octaveKey: "mala", octaveName: "Malá oktáva" },
@@ -80,9 +86,7 @@ export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
     { id: "t-g3", base: "g", accidental: "natural", pitchClass: "g", label: "g3", step: 18, freq: 1567.98, octaveKey: "tricarkovana", octaveName: "Tříčárkovaná" },
   ],
 
-  // BASOVÝ KLÍČ: Kontra (A1–H1), Velká (C–H), Malá (c–h), Jednočárkovaná (c1–e1)
   bass: [
-    // Kontra a Velká oktáva
     { id: "b-A1", base: "a", accidental: "natural", pitchClass: "a", label: "A1", step: -4, freq: 55.00, octaveKey: "kontra-velka", octaveName: "Kontra oktáva" },
     { id: "b-H1", base: "h", accidental: "natural", pitchClass: "h", label: "H1", step: -3, freq: 61.74, octaveKey: "kontra-velka", octaveName: "Kontra oktáva" },
     { id: "b-C", base: "c", accidental: "natural", pitchClass: "c", label: "C", step: -2, freq: 65.41, octaveKey: "kontra-velka", octaveName: "Velká oktáva" },
@@ -98,7 +102,6 @@ export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
     { id: "b-B", base: "h", accidental: "flat", pitchClass: "b", label: "B (Hes)", step: 4, freq: 116.54, octaveKey: "kontra-velka", octaveName: "Velká oktáva" },
     { id: "b-H", base: "h", accidental: "natural", pitchClass: "h", label: "H", step: 4, freq: 123.47, octaveKey: "kontra-velka", octaveName: "Velká oktáva" },
 
-    // Malá oktáva (c - h)
     { id: "b-c", base: "c", accidental: "natural", pitchClass: "c", label: "c", step: 5, freq: 130.81, octaveKey: "mala", octaveName: "Malá oktáva" },
     { id: "b-cis", base: "c", accidental: "sharp", pitchClass: "cis", label: "cis", step: 5, freq: 138.59, octaveKey: "mala", octaveName: "Malá oktáva" },
     { id: "b-d", base: "d", accidental: "natural", pitchClass: "d", label: "d", step: 6, freq: 146.83, octaveKey: "mala", octaveName: "Malá oktáva" },
@@ -112,7 +115,6 @@ export const NOTES_BY_CLEF: Record<ClefType, NoteItem[]> = {
     { id: "b-b", base: "h", accidental: "flat", pitchClass: "b", label: "b (hes)", step: 11, freq: 233.08, octaveKey: "mala", octaveName: "Malá oktáva" },
     { id: "b-h", base: "h", accidental: "natural", pitchClass: "h", label: "h", step: 11, freq: 246.94, octaveKey: "mala", octaveName: "Malá oktáva" },
 
-    // Jednočárkovaná oktáva nad basovou osnovou (c1 - e1)
     { id: "b-c1", base: "c", accidental: "natural", pitchClass: "c", label: "c1", step: 12, freq: 261.63, octaveKey: "jednocarkovana", octaveName: "Jednočárkovaná" },
     { id: "b-d1", base: "d", accidental: "natural", pitchClass: "d", label: "d1", step: 13, freq: 293.66, octaveKey: "jednocarkovana", octaveName: "Jednočárkovaná" },
     { id: "b-e1", base: "e", accidental: "natural", pitchClass: "e", label: "e1", step: 14, freq: 329.63, octaveKey: "jednocarkovana", octaveName: "Jednočárkovaná" },
@@ -136,30 +138,28 @@ export const Staff: React.FC<StaffProps> = ({
 }) => {
   const lineSpacing = 13;
   const halfStep = lineSpacing / 2;
-  // Spodní linka osnovy (step = 2) uprostřed plátna, aby se vešly pomocné linky dole (A1, g) i nahoře (g3, e1)
-  const bottomLineY = 138;
+  const bottomLineY = 138; // 1. linka (e1 v houslovém, G v basovém)
   const noteY = bottomLineY - (activeNote.step - 2) * halfStep;
   const noteX = 215;
 
-  const baseToneColor = NOTE_COLORS[activeNote.base] || "#4f46e5";
+  const baseToneColor = NOTE_COLORS[activeNote.base] || "#f59e0b";
 
   const noteColor =
     status === "correct"
-      ? "#16a34a"
+      ? "#10b981"
       : status === "wrong"
-      ? "#dc2626"
+      ? "#ef4444"
       : colorHints
       ? baseToneColor
-      : "#1e1b4b";
+      : "#334155";
 
   const borderClass =
     status === "correct"
-      ? "border-emerald-500 ring-4 ring-emerald-100"
+      ? "border-emerald-300 ring-4 ring-emerald-100"
       : status === "wrong"
-      ? "border-rose-500 ring-4 ring-rose-100"
-      : "border-indigo-100";
+      ? "border-rose-300 ring-4 ring-rose-100"
+      : "border-amber-200/80";
 
-  // Výpočet pomocných linek pod osnovou (step <= 0) a nad osnovou (step >= 12)
   const ledgerLinesY: number[] = [];
   if (activeNote.step <= 0) {
     for (let s = 0; s >= activeNote.step; s -= 2) {
@@ -174,8 +174,12 @@ export const Staff: React.FC<StaffProps> = ({
 
   return (
     <div
-      className={`w-full bg-gradient-to-b from-white to-indigo-50/50 rounded-3xl border-2 ${borderClass} p-2.5 shadow-md transition-all`}
+      className={`relative w-full bg-white/95 rounded-3xl border-2 ${borderClass} p-3 shadow-sm transition-all overflow-hidden`}
     >
+      {/* Zlaté dekorační hvězdičky v rozích karty */}
+      <span className="absolute top-2.5 left-3.5 text-sm text-amber-400 select-none">✦</span>
+      <span className="absolute top-2.5 right-3.5 text-sm text-amber-400 select-none">♪</span>
+
       <svg
         viewBox="0 0 320 205"
         className="w-full max-h-52 select-none"
@@ -198,25 +202,41 @@ export const Staff: React.FC<StaffProps> = ({
           );
         })}
 
-        {/* Správný houslový klíč – začíná spirálou přesně na 2. lince (g1, Y = 125) a stoupá vzhůru */}
+        {/* Houslový klíč – spirála obepíná 2. linku (g1, Y=125), stoupá vzhůru do smyčky a končí tečkou dole */}
         {clef === "treble" ? (
-          <g transform="translate(36, 138) scale(0.054, -0.054)">
+          <g fill="none" stroke="#92400e" strokeLinecap="round" strokeLinejoin="round">
+            {/* Začátek na 2. lince (g1, Y=125), spirála doprava dolů k 1. lince (Y=138), pak vlevo nahoru nad osnovu */}
             <path
-              fill="#4338ca"
-              d="M376 623c-37 0-70-13-96-39-27-26-41-59-41-99 0-32 10-61 29-86 19-25 45-41 77-48 8-2 12-6 12-12 0-7-5-11-16-11-48 0-89 19-123 56-34 38-51 84-51 139 0 58 21 110 64 156 42 46 95 75 159 87l34 196c-81 62-145 125-191 189-46 64-69 135-69 213 0 85 27 166 82 243 54 77 119 128 194 154 11 4 19 6 25 6 12 0 21-8 27-24 41-106 62-207 62-304 0-92-21-178-63-258-42-80-103-149-183-207l-28-163c18 2 34 3 48 3 73 0 135-25 186-76 51-50 76-113 76-188 0-63-20-118-61-166-41-48-93-77-156-88l-38-219c-2-14-4-27-4-39 0-43 13-77 39-103 26-26 60-39 102-39 36 0 67 12 93 36 26 24 39 54 39 90 0 31-10 57-31 78-21 21-46 31-76 31-26 0-48-9-66-26-18-17-27-39-27-65 0-21 7-39 20-54 13-15 30-23 50-24 6 0 9-3 9-8 0-7-6-11-19-11-36 0-67 13-93 40-26 27-39 59-39 97 0 43 16 80 48 111 32 31 71 46 117 46 49 0 90-17 124-51 34-34 51-76 51-126 0-58-21-107-64-147-43-40-96-60-159-60-66 0-121 21-165 64-44 43-66 98-66 165 0 22 3 46 9 72l35 202c-20-3-38-4-54-4zm122 865c-46-24-87-66-123-125-36-59-54-121-54-186 0-49 12-97 36-144l145 113c47 38 83 80 108 126 25 46 37 94 37 144 0 53-14 96-42 129-17-19-53-38-107-57zm-46-662l-26-152c-34-10-61-28-81-54-20-26-30-56-30-90 0-39 13-72 39-99 26-27 59-41 99-41 11 0 23 1 36 4l43 249c36 10 65 29 86 57 21 28 32 61 32 99 0 41-14 76-42 104-28 28-63 42-105 42-17 0-34-3-51-9z"
+              strokeWidth="3.6"
+              d="M 65 127
+                 C 61 124, 62 116, 69 116
+                 C 77 116, 82 124, 79 132
+                 C 76 140, 64 143, 55 138
+                 C 44 132, 43 116, 54 104
+                 C 64 93, 76 81, 74 67
+                 C 72 58, 63 58, 62 68
+                 L 67 154
+                 C 68 163, 60 168, 53 164"
             />
+            {/* Kulatá tečka na konci dole vlevo */}
+            <circle cx="52" cy="161" r="4.2" fill="#92400e" stroke="none" />
           </g>
         ) : (
-          /* Správný basový klíč – tečka i dvojtečka kolem 4. linky f */
-          <g transform="translate(38, 99) scale(0.054, -0.054)">
+          /* Basový klíč – velká kulatá tečka na 4. lince (f, Y=99) + oblouk + dvě tečky kolem 4. linky */
+          <g fill="none" stroke="#0f766e" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="53" cy="99" r="5" fill="#0f766e" stroke="none" />
             <path
-              fill="#ea580c"
-              d="M270 250c68 0 127-23 177-69 50-46 75-106 75-180 0-92-36-183-108-273-72-90-178-174-318-252-13-7-23-11-31-11-11 0-17 6-17 18 0 8 6 16 18 24 114 67 201 139 261 216 60 77 90 158 90 243 0 58-15 105-45 141-30 36-69 54-117 54-42 0-77-13-105-39-28-26-42-59-42-99 0-7 2-14 5-21 15 14 34 21 57 21 27 0 50-9 69-28 19-19 28-42 28-69 0-28-10-52-30-72-20-20-44-30-72-30-35 0-64 13-87 39-23 26-35 60-35 102 0 67 25 124 75 171 50 47 112 70 186 70zm385-55c21 0 39-7 54-22 15-15 22-33 22-54s-7-39-22-54c-15-15-33-22-54-22s-39 7-54 22c-15 15-22 33-22 54s7 39 22 54c15 15 33 22 54 22zm0-245c21 0 39-7 54-22 15-15 22-33 22-54s-7-39-22-54c-15-15-33-22-54-22s-39 7-54 22c-15 15-22 33-22 54s7 39 22 54c15 15 33 22 54 22z"
+              strokeWidth="3.8"
+              d="M 53 99
+                 C 63 85, 81 90, 81 108
+                 C 81 124, 66 135, 48 141"
             />
+            <circle cx="90" cy="92.5" r="2.6" fill="#0f766e" stroke="none" />
+            <circle cx="90" cy="105.5" r="2.6" fill="#0f766e" stroke="none" />
           </g>
         )}
 
-        {/* Pomocné linky nad i pod osnovou */}
+        {/* Pomocné linky */}
         {ledgerLinesY.map((ly, idx) => (
           <line
             key={idx}
@@ -224,8 +244,8 @@ export const Staff: React.FC<StaffProps> = ({
             y1={ly}
             x2={noteX + 18}
             y2={ly}
-            stroke="#475569"
-            strokeWidth="2"
+            stroke="#64748b"
+            strokeWidth="1.8"
           />
         ))}
 
@@ -279,21 +299,21 @@ export const Staff: React.FC<StaffProps> = ({
         )}
       </svg>
 
-      {/* Barevný štítek s názvem tónu */}
+      {/* Štítek s názvem tónu */}
       <div className="h-8 flex items-center justify-center">
         {showLabel ? (
           <span
-            className="px-3.5 py-0.5 rounded-full text-sm font-extrabold text-white shadow-sm"
+            className="px-4 py-0.5 rounded-full text-sm font-extrabold text-slate-900 shadow-xs"
             style={{ backgroundColor: noteColor }}
           >
             {activeNote.label}{" "}
-            <span className="text-xs font-normal opacity-95">
+            <span className="text-xs font-medium opacity-85">
               ({activeNote.octaveName})
             </span>
           </span>
         ) : (
-          <span className="text-xs font-semibold text-indigo-500">
-            Poznej tón včetně posuvky (♯ / ♭)
+          <span className="text-xs font-semibold text-amber-700">
+            Poznej tón na osnově ✦
           </span>
         )}
       </div>
