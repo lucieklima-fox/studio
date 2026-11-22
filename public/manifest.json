@@ -1,0 +1,19 @@
+{
+  "name": "Foxnoty – Melody Maestro",
+  "short_name": "Foxnoty",
+  "description": "Interaktivní hudební výuka čtení not, posuvek a hry na klavír v češtině.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffbeb",
+  "theme_color": "#fde68a",
+  "lang": "cs",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
