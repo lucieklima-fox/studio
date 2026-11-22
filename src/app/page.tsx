@@ -41,7 +41,6 @@ export default function HomePage() {
   const [status, setStatus] = useState<"idle" | "correct" | "wrong">("idle");
   const [activeKey, setActiveKey] = useState<string | null>(null);
 
-  // Stav kvízu po 10 otázkách + pytlíček na diamanty
   const [quizQuestion, setQuizQuestion] = useState(1);
   const [quizCorrectCount, setQuizCorrectCount] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
@@ -92,9 +91,9 @@ export default function HomePage() {
   };
 
   const playCelebration = () => {
-    playTone(523.25, 0.25); // c2
-    setTimeout(() => playTone(659.25, 0.25), 140); // e2
-    setTimeout(() => playTone(783.99, 0.45), 280); // g2
+    playTone(523.25, 0.25);
+    setTimeout(() => playTone(659.25, 0.25), 140);
+    setTimeout(() => playTone(783.99, 0.45), 280);
   };
 
   const handleKeyPress = (acceptedPitchClasses: string[], keyId: string) => {
@@ -123,7 +122,7 @@ export default function HomePage() {
       const newCorrect = quizCorrectCount + 1;
       setQuizCorrectCount(newCorrect);
       setStatus("correct");
-      setFeedback(`Správně! Je to ${currentNote.label} ✨`);
+      setFeedback(`Správně! Je to ${currentNote.label} ✦`);
       playTone(currentNote.freq);
 
       setTimeout(() => {
@@ -158,26 +157,26 @@ export default function HomePage() {
       className="min-h-[100dvh] text-slate-800 flex justify-center"
       style={{
         background:
-          "linear-gradient(150deg, #fdf2f8 0%, #fff7ed 48%, #f3e8ff 100%)",
+          "linear-gradient(150deg, #fffbeb 0%, #fef3c7 45%, #ecfdf5 100%)",
       }}
     >
       <div className="w-full max-w-md flex flex-col justify-between px-4 py-3 gap-2">
-        {/* Pastelová horní lišta + Pytlíček na diamanty */}
+        {/* Horní lišta: Zlatá + Šalvějová + Pytlíček na diamanty */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div
-              className="w-11 h-11 rounded-2xl shadow-xs flex items-center justify-center text-2xl border border-orange-200"
+              className="w-11 h-11 rounded-2xl shadow-xs flex items-center justify-center text-2xl border border-amber-300"
               style={{
-                background: "linear-gradient(135deg, #fed7aa, #fbcfe8)",
+                background: "linear-gradient(135deg, #fde68a, #fed7aa)",
               }}
             >
               🦊
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tight text-purple-800">
+              <h1 className="text-lg font-black tracking-tight text-amber-900">
                 Foxnoty
               </h1>
-              <p className="text-xs font-medium text-purple-400">
+              <p className="text-xs font-medium text-amber-700/80">
                 Melody Maestro
               </p>
             </div>
@@ -188,20 +187,19 @@ export default function HomePage() {
               onClick={() => setColorHints(!colorHints)}
               className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition ${
                 colorHints
-                  ? "bg-purple-200/80 text-purple-900 border-purple-300"
-                  : "bg-white/80 text-slate-500 border-slate-200"
+                  ? "bg-amber-200 text-amber-950 border-amber-300"
+                  : "bg-white/85 text-slate-500 border-slate-200"
               }`}
             >
               🎨 Barvy
             </button>
 
-            {/* Pytlíček s nasbíranými diamanty */}
             <div
               title="Tvůj pytlíček na diamanty (odměna za kvíz nad 90 %)"
-              className="bg-white/90 border border-pink-200 rounded-2xl px-3 py-1.5 flex items-center gap-1.5 shadow-xs"
+              className="bg-white/95 border border-amber-300 rounded-2xl px-3 py-1.5 flex items-center gap-1.5 shadow-xs"
             >
               <span className="text-base">👝</span>
-              <span className="font-black text-purple-700 text-sm">
+              <span className="font-black text-amber-900 text-sm">
                 {diamonds} 💎
               </span>
             </div>
@@ -209,7 +207,7 @@ export default function HomePage() {
         </header>
 
         {/* Přepínač Studium / Kvíz */}
-        <div className="grid grid-cols-2 bg-white/80 border border-purple-100 p-1 rounded-2xl shadow-xs">
+        <div className="grid grid-cols-2 bg-white/85 border border-amber-200 p-1 rounded-2xl shadow-xs">
           <button
             onClick={() => {
               setMode("study");
@@ -217,7 +215,7 @@ export default function HomePage() {
             }}
             className={`py-2 text-sm font-extrabold rounded-xl transition ${
               mode === "study"
-                ? "bg-purple-200 text-purple-950 shadow-xs"
+                ? "bg-amber-200 text-amber-950 shadow-xs"
                 : "text-slate-500"
             }`}
           >
@@ -230,7 +228,7 @@ export default function HomePage() {
             }}
             className={`py-2 text-sm font-extrabold rounded-xl transition ${
               mode === "quiz"
-                ? "bg-orange-200 text-orange-950 shadow-xs"
+                ? "bg-emerald-200 text-emerald-950 shadow-xs"
                 : "text-slate-500"
             }`}
           >
@@ -249,7 +247,7 @@ export default function HomePage() {
               setStatus("idle");
             }}
             aria-label="Výběr klíče"
-            className="col-span-4 bg-white/90 border border-purple-100 rounded-xl px-2 py-2 text-xs font-bold text-slate-700"
+            className="col-span-4 bg-white/95 border border-amber-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-700"
           >
             <option value="treble">🎼 Houslový</option>
             <option value="bass">𝄢 Basový</option>
@@ -263,7 +261,7 @@ export default function HomePage() {
               setStatus("idle");
             }}
             aria-label="Výběr oktávy"
-            className="col-span-4 bg-white/90 border border-purple-100 rounded-xl px-2 py-2 text-xs font-bold text-slate-700"
+            className="col-span-4 bg-white/95 border border-amber-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-700"
           >
             <option value="all">Všechny oktávy</option>
             {clef === "bass" && (
@@ -287,7 +285,7 @@ export default function HomePage() {
               setStatus("idle");
             }}
             aria-label="Výběr posuvek"
-            className="col-span-4 bg-white/90 border border-purple-100 rounded-xl px-2 py-2 text-xs font-bold text-slate-700"
+            className="col-span-4 bg-white/95 border border-amber-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-700"
           >
             <option value="all">♯♭ Vše</option>
             <option value="natural">♮ Základní</option>
@@ -299,28 +297,28 @@ export default function HomePage() {
         {/* Hlavní část: Notová osnova nebo vyhodnocení kvízu */}
         <main className="flex flex-col gap-2">
           {mode === "quiz" && quizFinished ? (
-            <div className="bg-white/95 border-2 border-purple-200 rounded-3xl p-5 text-center flex flex-col items-center gap-2.5 shadow-sm">
+            <div className="bg-white/95 border-2 border-amber-300 rounded-3xl p-5 text-center flex flex-col items-center gap-2.5 shadow-sm">
               <div className="text-4xl">
-                {earnedDiamondNow ? "🦊💎🎉" : "🦊🌸"}
+                {earnedDiamondNow ? "🦊💎🎉" : "🦊✦"}
               </div>
-              <h2 className="text-lg font-black text-purple-900">
+              <h2 className="text-lg font-black text-amber-900">
                 Výsledek kvízu: {quizScorePct} %
               </h2>
               <p className="text-xs text-slate-600">
                 Správně {quizCorrectCount} z {QUIZ_LENGTH} tónů.
               </p>
               {earnedDiamondNow ? (
-                <div className="bg-pink-100 text-pink-900 px-3.5 py-2 rounded-2xl text-xs font-bold">
-                  ✨ Skvělá práce! Získáváš 1 nový diamant do pytlíčku!
+                <div className="bg-amber-100 text-amber-950 border border-amber-300 px-3.5 py-2 rounded-2xl text-xs font-bold">
+                  ✦ Skvělá práce! Získáváš 1 zlatý diamant do pytlíčku!
                 </div>
               ) : (
-                <p className="text-xs text-purple-500 font-medium">
+                <p className="text-xs text-amber-800 font-medium">
                   Dosáhni alespoň 90 % a získej další diamant 💎
                 </p>
               )}
               <button
                 onClick={startNewQuiz}
-                className="mt-1 bg-purple-600 text-white px-5 py-2.5 rounded-2xl text-xs font-extrabold shadow-xs active:scale-95"
+                className="mt-1 bg-amber-500 text-white px-5 py-2.5 rounded-2xl text-xs font-extrabold shadow-xs active:scale-95"
               >
                 Hrát další kvíz →
               </button>
@@ -343,13 +341,13 @@ export default function HomePage() {
                       setIndex(next);
                       playTone(notes[next].freq);
                     }}
-                    className="bg-white/90 border border-purple-100 rounded-xl py-2 text-xs font-bold text-purple-800 active:bg-purple-50"
+                    className="bg-white/95 border border-amber-200 rounded-xl py-2 text-xs font-bold text-amber-900 active:bg-amber-50"
                   >
                     ← Předchozí
                   </button>
                   <button
                     onClick={() => playTone(currentNote.freq)}
-                    className="bg-purple-200 text-purple-950 rounded-xl py-2 text-xs font-extrabold active:scale-95"
+                    className="bg-amber-200 text-amber-950 border border-amber-300 rounded-xl py-2 text-xs font-extrabold active:scale-95"
                   >
                     🔊 Přehrát
                   </button>
@@ -359,20 +357,20 @@ export default function HomePage() {
                       setIndex(next);
                       playTone(notes[next].freq);
                     }}
-                    className="bg-white/90 border border-purple-100 rounded-xl py-2 text-xs font-bold text-purple-800 active:bg-purple-50"
+                    className="bg-white/95 border border-amber-200 rounded-xl py-2 text-xs font-bold text-amber-900 active:bg-amber-50"
                   >
                     Další →
                   </button>
                 </div>
               ) : (
-                <div className="bg-white/90 border border-orange-100 rounded-xl px-3 py-2 flex justify-between items-center text-xs">
-                  <span className="font-bold text-purple-700">
+                <div className="bg-white/95 border border-emerald-200 rounded-xl px-3 py-2 flex justify-between items-center text-xs">
+                  <span className="font-bold text-emerald-800">
                     {quizQuestion}/{QUIZ_LENGTH}
                   </span>
                   <span className="font-semibold text-slate-700">{feedback}</span>
                   <button
                     onClick={() => playTone(currentNote.freq)}
-                    className="text-purple-600 font-extrabold underline"
+                    className="text-amber-800 font-extrabold underline"
                   >
                     🔊 Zvuk
                   </button>
@@ -382,9 +380,9 @@ export default function HomePage() {
           )}
         </main>
 
-        {/* Pastelová klaviatura */}
+        {/* Klaviatura */}
         <section className="mt-auto">
-          <p className="text-[11px] font-medium text-purple-500 text-center mb-1.5">
+          <p className="text-[11px] font-medium text-amber-900/75 text-center mb-1.5">
             {mode === "study"
               ? "Zahraj tón na klaviatuře:"
               : "Stiskni správnou klávesu:"}
@@ -401,7 +399,7 @@ export default function HomePage() {
                   <button
                     key={k.base}
                     onClick={() => handleKeyPress([k.base], k.base)}
-                    className={`h-full rounded-b-2xl border border-purple-200 border-b-4 font-black text-base flex flex-col items-center justify-end pb-2 shadow-xs active:translate-y-0.5 transition ${
+                    className={`h-full rounded-b-2xl border border-amber-200 border-b-4 font-black text-base flex flex-col items-center justify-end pb-2 shadow-xs active:translate-y-0.5 transition ${
                       isCorrect
                         ? "bg-emerald-100 border-emerald-400"
                         : isWrong
@@ -446,11 +444,11 @@ export default function HomePage() {
         </section>
 
         {/* Patička */}
-        <footer className="flex justify-between items-center text-[11px] text-purple-400 pt-0.5">
+        <footer className="flex justify-between items-center text-[11px] text-amber-800/70 pt-0.5">
           <span>Foxnoty © 2026</span>
           <button
             onClick={() => setShowPrivacy(true)}
-            className="text-purple-600 font-semibold underline"
+            className="text-amber-900 font-semibold underline"
           >
             Ochrana soukromí
           </button>
@@ -459,8 +457,8 @@ export default function HomePage() {
 
       {showPrivacy && (
         <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-5 z-50">
-          <div className="bg-white rounded-3xl p-5 max-w-sm flex flex-col gap-3 text-sm leading-relaxed shadow-xl border border-purple-100">
-            <h2 className="font-bold text-base text-purple-900">
+          <div className="bg-white rounded-3xl p-5 max-w-sm flex flex-col gap-3 text-sm leading-relaxed shadow-xl border border-amber-200">
+            <h2 className="font-bold text-base text-amber-900">
               Zásady ochrany osobních údajů
             </h2>
             <p>
@@ -474,7 +472,7 @@ export default function HomePage() {
             </p>
             <button
               onClick={() => setShowPrivacy(false)}
-              className="bg-purple-200 text-purple-950 font-bold py-2 rounded-xl mt-1"
+              className="bg-amber-200 text-amber-950 font-bold py-2 rounded-xl mt-1"
             >
               Zavřít
             </button>
